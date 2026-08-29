@@ -2,6 +2,7 @@ package com.mathi.finance.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mathi.finance.dataconnect.FinanceConnector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,19 +14,17 @@ class TransactionViewModel : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val connector = FinanceConnector.instance
 
     fun loadTransactions(userId: String) {
         viewModelScope.launch {
             _isLoading.value = true
-            // TODO: Use generated Data Connect SDK here
-//             val result = connector.listTransactions.execute(userId)
-//             _transactions.value = result.data.transactions.map { ... }
-            
-            // For now, using mock data until SDK is generated
-            _transactions.value = listOf(
-                Transaction(amount = 50.0, description = "Lunch", category = "Food", userId = userId),
-                Transaction(amount = 20.0, description = "Bus", category = "Transport", userId = userId)
-            )
+            try {
+                val result = connector.listTransactions.execute(userId)
+                _transactions.value = result.data.transactions
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             _isLoading.value = false
         }
     }
@@ -33,9 +32,8 @@ class TransactionViewModel : ViewModel() {
     fun addTransaction(amount: Double, description: String, category: String, userId: String) {
         viewModelScope.launch {
             _isLoading.value = true
+            connector.addTransaction.execute(amount, description, category, userId)
 
-            val newTransaction = Transaction(amount = amount, description = description, category = category, userId = userId)
-            _transactions.value = _transactions.value + newTransaction
             _isLoading.value = false
         }
     }
