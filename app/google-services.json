@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "794201004088",
+    "project_id": "my-finance-d9638",
+    "storage_bucket": "my-finance-d9638.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794201004088:android:31818641de2d87c3eaeecd",
+        "android_client_info": {
+          "package_name": "com.mathi.finance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "794201004088-95aprft8223gm954a5mscdvj0lfet4ku.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mathi.finance",
+            "certificate_hash": "8855c4294aa86ac978a542dcd4e44876c2977fd7"
+          }
+        },
+        {
+          "client_id": "794201004088-m6im5beu3vol174d2obdqc07if668cns.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCOb8V-CSaZYkBbv6CnvuZyxs7XyjGpdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "794201004088-m6im5beu3vol174d2obdqc07if668cns.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

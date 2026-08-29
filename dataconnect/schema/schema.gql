@@ -1,0 +1,8 @@
+type Transaction @table {
+  id: UUID! @default(expr: "uuid_generate_v4()")
+  amount: Float!
+  description: String
+  category: String
+  date: Timestamp! @default(expr: "now()")
+  userId: String!
+}

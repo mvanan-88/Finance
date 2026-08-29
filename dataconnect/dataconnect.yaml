@@ -1,0 +1,7 @@
+specVersion: "v1alpha"
+serviceId: "my-finance-service"
+location: "us-central1"
+schema:
+  source: "schema"
+connectors:
+  - source: "connector"

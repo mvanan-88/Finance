@@ -1,0 +1,5 @@
+connectorId: "finance-connector"
+generate:
+  kotlinSdk:
+    outputDir: "../../app/src/main/java/com/mathi/finance/dataconnect"
+    package: "com.mathi.finance.dataconnect"

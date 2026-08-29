@@ -1,0 +1,18 @@
+mutation addTransaction($amount: Float!, $description: String, $category: String, $userId: String!) {
+  transaction_insert(data: {
+    amount: $amount,
+    description: $description,
+    category: $category,
+    userId: $userId
+  })
+}
+
+query listTransactions($userId: String!) {
+  transactions(where: { userId: { eq: $userId } }) {
+    id
+    amount
+    description
+    category
+    date
+  }
+}
