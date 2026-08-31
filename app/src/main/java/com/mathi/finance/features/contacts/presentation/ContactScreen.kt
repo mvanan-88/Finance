@@ -14,16 +14,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import com.mathi.finance.features.contacts.domain.model.Contact
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactScreen(
-    viewModel: ContactViewModel = viewModel()
+    viewModel: ContactViewModel = koinViewModel()
 ) {
     val contacts by viewModel.contacts.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val syncStatus by viewModel.syncStatus.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(syncStatus) {
+        syncStatus?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
 
     var hasPermission by remember {
         mutableStateOf(
@@ -50,32 +59,45 @@ fun ContactScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(text = "Contacts", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (!hasPermission) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Button(onClick = { launcher.launch(Manifest.permission.READ_CONTACTS) }) {
-                    Text("Grant Permission")
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Contacts") },
+                actions = {
+                    if (hasPermission) {
+                        Button(onClick = { viewModel.syncContacts() }) {
+                            Text("Sync")
+                        }
+                    }
                 }
-            }
-        } else if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(contacts) { contact ->
-                    ContactItem(contact)
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            if (!hasPermission) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Button(onClick = { launcher.launch(Manifest.permission.READ_CONTACTS) }) {
+                        Text("Grant Permission")
+                    }
+                }
+            } else if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(contacts) { contact ->
+                        ContactItem(contact)
+                    }
                 }
             }
         }
