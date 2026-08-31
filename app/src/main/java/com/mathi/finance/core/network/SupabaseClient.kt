@@ -1,8 +1,8 @@
 package com.mathi.finance.core.network
 
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.auth.Auth
 
 object SupabaseClient {
     // Replace with your actual project URL and API key from the Supabase Dashboard

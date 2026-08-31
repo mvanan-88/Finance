@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mathi.finance.core.network.SupabaseClient
 import com.mathi.finance.features.master.domain.model.InterestRates
-import com.mathi.finance.features.master.domain.model.master_data
 import com.mathi.finance.features.transactions.domain.model.TransactionType
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
