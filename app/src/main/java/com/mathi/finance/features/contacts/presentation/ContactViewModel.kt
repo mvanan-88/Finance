@@ -4,7 +4,6 @@ import android.app.Application
 import android.provider.ContactsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.mathi.finance.core.network.SupabaseClient
 import com.mathi.finance.core.network.NetworkObserver
 import com.mathi.finance.core.prefs.PreferenceManager
 import com.mathi.finance.features.contacts.data.repository.ContactRepository
