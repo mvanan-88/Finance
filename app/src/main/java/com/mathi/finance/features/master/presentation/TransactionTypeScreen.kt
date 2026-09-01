@@ -49,7 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.mathi.finance.features.transactions.domain.model.TransactionType
+import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.ui.presentation.AppBar
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

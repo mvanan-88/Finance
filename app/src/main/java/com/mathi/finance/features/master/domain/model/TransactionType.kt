@@ -1,4 +1,4 @@
-package com.mathi.finance.features.transactions.domain.model
+package com.mathi.finance.features.master.domain.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

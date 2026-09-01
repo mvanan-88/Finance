@@ -29,6 +29,6 @@ val appModule = module {
     
     viewModel { LoginViewModel(get()) }
     viewModel { MasterViewModel() }
-    viewModel { TransactionViewModel() }
+    viewModel { TransactionViewModel(get()) }
     viewModel { ContactViewModel(get(), get(), get(), get()) }
 }

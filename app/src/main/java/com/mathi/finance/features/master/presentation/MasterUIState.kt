@@ -1,7 +1,7 @@
 package com.mathi.finance.features.master.presentation
 
 import com.mathi.finance.features.master.domain.model.InterestRates
-import com.mathi.finance.features.transactions.domain.model.TransactionType
+import com.mathi.finance.features.master.domain.model.TransactionType
 
 data class MasterUIState(
     val isLoading: Boolean = false,
