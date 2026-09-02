@@ -1,0 +1,40 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Directories
+/build
+/captures
+.gradle
+.externalNativeBuild
+.cxx
+bin/
+gen/
+
+# Local configuration
+/local.properties
+
+# IDE files
+/.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+.metadata/
+.settings/
+.project
+.classpath

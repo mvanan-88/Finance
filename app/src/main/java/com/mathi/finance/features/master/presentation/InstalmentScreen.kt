@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.features.master.domain.model.InterestRates
+import com.mathi.finance.features.master.domain.model.instalment_data
 import com.mathi.finance.ui.presentation.AppBar
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -61,7 +62,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestRateScreen(
+fun InstalmentScreen(
     onBack: () -> Unit,
     viewModel: MasterViewModel = koinViewModel()
 ) {
@@ -71,22 +72,22 @@ fun InterestRateScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     // Form States
-    var interestRateInput by remember { mutableStateOf("") }
+    var tenureInput by remember { mutableStateOf("") }
     var transactionStatus by remember { mutableIntStateOf(1) } // 1 for Active, 0 for Inactive
-    var editingItem by remember { mutableStateOf<InterestRates?>(null) }
+    var editingItem by remember { mutableStateOf<instalment_data?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect("") {
-        viewModel.fetchInterests()
+        viewModel.fetchInstalment()
     }
 
     Scaffold(
-        topBar = { AppBar("Interest Rates", onBack = onBack) },
+        topBar = { AppBar("Instalment Tenure", onBack = onBack) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     editingItem = null
-                    interestRateInput = ""
+                    tenureInput = ""
                     transactionStatus = 1
                     showBottomSheet = true
                 }
@@ -107,9 +108,9 @@ fun InterestRateScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             }
-            if (uiState.interestList.isNotEmpty()) {
+            if (uiState.instalmentList.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.fillMaxHeight()) {
-                    items(items = uiState.interestList, itemContent = { item ->
+                    items(items = uiState.instalmentList, itemContent = { item ->
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
                             modifier = Modifier
@@ -122,7 +123,7 @@ fun InterestRateScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = item.interest_rate.toString(), modifier = Modifier.padding(all = 16.dp))
+                                Text(text = item.tenure.toString(), modifier = Modifier.padding(all = 16.dp))
                                 Row(
                                     modifier = Modifier.padding(all = 16.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -143,7 +144,7 @@ fun InterestRateScreen(
                                             .size(16.dp)
                                             .clickable {
                                                 editingItem = item
-                                                interestRateInput = item.interest_rate.toString()
+                                                tenureInput = item.tenure.toString()
                                                 transactionStatus = item.status
                                                 showBottomSheet = true
                                             },
@@ -171,20 +172,20 @@ fun InterestRateScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (editingItem == null) "Add Interest Rate" else "Edit Interest Rate",
+                        text = if (editingItem == null) "Add Instalment Tenure" else "Edit Instalment Tenure",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TextField(
-                        value = interestRateInput,
+                        value = tenureInput,
                         onValueChange = { input ->
-                            if (input.isEmpty() || input.toFloatOrNull() != null || input == ".") {
-                                interestRateInput = input
+                            if (input.isEmpty() || input.toIntOrNull() != null) {
+                                tenureInput = input
                             }
                         },
-                        label = { Text("Interest Rate") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        label = { Text("Tenure (weeks)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -231,24 +232,23 @@ fun InterestRateScreen(
 
                     Button(
                         onClick = {
-                            val rate = interestRateInput.toFloatOrNull() ?: 0.0f
+                            val rate = tenureInput.toIntOrNull() ?: 0
                             if (rate > 0.0f) {
                                 if (editingItem == null) {
                                     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
                                     val currentDate = sdf.format(Date())
-                                    val newType = InterestRates(
-                                        interest_rate = rate,
+                                    val newType = instalment_data(
+                                        tenure = rate,
                                         created_at = currentDate,
                                         status = transactionStatus,
-                                        created_by = 1
                                     )
-                                    viewModel.addInterest(newType)
+                                    viewModel.addInstalment(newType)
                                 } else {
                                     val updatedType = editingItem!!.copy(
-                                        interest_rate = rate,
+                                        tenure = rate,
                                         status = transactionStatus
                                     )
-                                    viewModel.updateInterest(updatedType)
+                                    viewModel.updateInstalment(updatedType)
                                 }
 
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {

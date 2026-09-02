@@ -13,40 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.features.contacts.domain.model.Contact
@@ -60,9 +35,18 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Main transaction screen displaying a list of recorded transactions and providing
+ * functionality to create new transactions via a bottom sheet form.
+ *
+ * @param onSignOut Callback invoked when user requests sign out from the top app bar.
+ * @param modifier Optional [Modifier] for screen-level layout adjustments.
+ * @param viewModel The [TransactionViewModel] instance providing UI state and transaction actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionScreen(
+    onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TransactionViewModel = koinViewModel()
 ) {
@@ -75,14 +59,19 @@ fun TransactionScreen(
     var selectedContact by remember { mutableStateOf<Contact?>(null) }
     var selectedType by remember { mutableStateOf<TransactionType?>(null) }
     var selectedInterestRate by remember { mutableStateOf<InterestRates?>(null) }
+    var selectedInstalment by remember { mutableStateOf<com.mathi.finance.features.master.domain.model.instalment_data?>(null) }
+    var tenureInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
     
     var showContactDialog by remember { mutableStateOf(false) }
     var typesExpanded by remember { mutableStateOf(false) }
     var interestExpanded by remember { mutableStateOf(false) }
+    var instalmentExpanded by remember { mutableStateOf(false) }
+
 
     Scaffold(
-        topBar = { AppBar("Transactions") },
+        topBar = { AppBar("Transactions", onSignOut = onSignOut) },
+        containerColor = Color.Transparent,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -107,29 +96,58 @@ fun TransactionScreen(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(uiState.transactions) { transaction ->
-                    val contactName = uiState.contacts.find { it.id?.toInt() == transaction.contact_id }?.name ?: "Unknown"
-                    val typeName = uiState.transactionTypes.find { it.id == transaction.transaction_type_id }?.name ?: "Unknown"
-                    
+                    val contactName = transaction.contact?.name ?: "Unknown"
+                    val typeName = transaction.transactionType?.name ?: "Unknown"
+                    val interestRate = transaction.interestRate?.rate
+                    val instalmentTenure = transaction.instalment_tenure?.tenure
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(20.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = contactName, style = MaterialTheme.typography.titleMedium)
-                                Text(text = "$${transaction.amount}", style = MaterialTheme.typography.titleLarge)
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(text = typeName, style = MaterialTheme.typography.bodyMedium)
-                                Text(text = "Int: ${transaction.interest_rate_id}%", style = MaterialTheme.typography.bodySmall)
+                                Column {
+                                    Text(
+                                        text = contactName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = typeName,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = "$${transaction.amount}",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                    if (interestRate != null) {
+                                        Text(
+                                            text = "Int: $interestRate%",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    } else if (instalmentTenure != null) {
+                                        Text(
+                                            text = if (transaction.transactionType?.name == "Installment") "Tenure: ${instalmentTenure} weeks" else "Tenure: ${instalmentTenure} days",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -205,37 +223,85 @@ fun TransactionScreen(
                         }
                     }
 
-                    // Interest Rate Dropdown (Visible only if Transaction Type ID is 2)
-                    if (selectedType?.id == 2) {
-                        ExposedDropdownMenuBox(
-                            expanded = interestExpanded,
-                            onExpandedChange = { interestExpanded = !interestExpanded },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            TextField(
-                                value = if (selectedInterestRate != null) "${selectedInterestRate?.interest_rate}%" else "",
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Interest Rate") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = interestExpanded) },
-                                modifier = Modifier
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                    .fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
+                    // Interest Rate or Tenure Field
+                    if (selectedType != null) {
+                        if (selectedType?.id == 2) {
+                            // Interest Rate Dropdown
+                            ExposedDropdownMenuBox(
                                 expanded = interestExpanded,
-                                onDismissRequest = { interestExpanded = false }
+                                onExpandedChange = { interestExpanded = !interestExpanded },
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                uiState.interestRates.forEach { rate ->
-                                    DropdownMenuItem(
-                                        text = { Text("${rate.interest_rate}%") },
-                                        onClick = {
-                                            selectedInterestRate = rate
-                                            interestExpanded = false
-                                        }
-                                    )
+                                TextField(
+                                    value = if (selectedInterestRate != null) "${selectedInterestRate?.interest_rate}%" else "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Interest Rate") },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = interestExpanded) },
+                                    modifier = Modifier
+                                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                        .fillMaxWidth()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = interestExpanded,
+                                    onDismissRequest = { interestExpanded = false }
+                                ) {
+                                    uiState.interestRates.forEach { rate ->
+                                        DropdownMenuItem(
+                                            text = { Text("${rate.interest_rate}%") },
+                                            onClick = {
+                                                selectedInterestRate = rate
+                                                interestExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
+                        } else if (selectedType?.id == 1) {
+                            // Instalment Dropdown
+                            ExposedDropdownMenuBox(
+                                expanded = instalmentExpanded,
+                                onExpandedChange = { instalmentExpanded = !instalmentExpanded },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                TextField(
+                                    value = if (selectedInstalment != null) "${selectedInstalment?.tenure} weeks" else "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Instalment Tenure") },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = instalmentExpanded) },
+                                    modifier = Modifier
+                                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                        .fillMaxWidth()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = instalmentExpanded,
+                                    onDismissRequest = { instalmentExpanded = false }
+                                ) {
+                                    uiState.instalmentList.forEach { item ->
+                                        DropdownMenuItem(
+                                            text = { Text("${item.tenure} weeks") },
+                                            onClick = {
+                                                selectedInstalment = item
+                                                instalmentExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            // Tenure TextField for other transaction types
+                            TextField(
+                                value = tenureInput,
+                                onValueChange = { input ->
+                                    if (input.isEmpty() || input.toIntOrNull() != null) {
+                                        tenureInput = input
+                                    }
+                                },
+                                label = { Text("Tenure (weeks)") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
 
@@ -255,14 +321,19 @@ fun TransactionScreen(
                     Button(
                         onClick = {
                             val amount = amountInput.toFloatOrNull() ?: 0f
-                            val interest = if (selectedType?.id == 2) selectedInterestRate?.interest_rate ?: 0f else 0f
                             val interestId = if (selectedType?.id == 2) selectedInterestRate?.id else null
+                            val instalmentId = if (selectedType?.id == 1) selectedInstalment?.id else null
+                            val tenure = when {
+                                selectedType?.id == 2 -> null
+                                selectedType?.id == 1 -> selectedInstalment?.tenure
+                                else -> tenureInput.toIntOrNull()
+                            }
                             val contactId = selectedContact?.id
                             val typeId = selectedType?.id
-                            val currentUserId = viewModel.getCurrentUserId()
+                            val currentUserId = viewModel.currentUserId
 
                             if (amount > 0 && contactId != null && typeId != null && currentUserId != -1) {
-                                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+                                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
                                 val currentDate = sdf.format(Date())
 
                                 val transaction = PerPersonTransaction(
@@ -271,6 +342,7 @@ fun TransactionScreen(
                                     transaction_type_id = typeId,
                                     interest_rate_id = interestId,
                                     amount = amount,
+                                    instalment_tenure_id = instalmentId,
                                     created_by = currentUserId
                                 )
                                 viewModel.addTransaction(transaction)
@@ -282,13 +354,18 @@ fun TransactionScreen(
                                         selectedContact = null
                                         selectedType = null
                                         selectedInterestRate = null
+                                        selectedInstalment = null
                                         amountInput = ""
+                                        tenureInput = ""
                                     }
                                 }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null && (selectedType?.id != 2 || selectedInterestRate != null)
+                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null && 
+                                (selectedType?.id != 2 || selectedInterestRate != null) &&
+                                (selectedType?.id != 1 || selectedInstalment != null) &&
+                                (selectedType?.id == 2 || selectedType?.id == 1 || tenureInput.isNotEmpty())
                     ) {
                         Text("Submit")
                     }
@@ -309,6 +386,15 @@ fun TransactionScreen(
     }
 }
 
+/**
+ * A modal dialog allowing users to search and select a contact from the list.
+ *
+ * Supports filtering contacts by name or phone number.
+ *
+ * @param contacts Full list of available [Contact] entities to filter and display.
+ * @param onContactSelected Callback triggered with the chosen [Contact].
+ * @param onDismiss Callback invoked when the user dismisses the dialog.
+ */
 @Composable
 fun SearchableContactDialog(
     contacts: List<Contact>,

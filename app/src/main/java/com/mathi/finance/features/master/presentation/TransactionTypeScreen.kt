@@ -60,6 +60,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionTypeScreen(
+    onBack: () -> Unit,
     viewModel: MasterViewModel = koinViewModel()
 ) {
     val uiState by viewModel.listState.collectAsState()
@@ -78,7 +79,7 @@ fun TransactionTypeScreen(
     }
 
     Scaffold(
-        topBar = { AppBar("Transaction Types") },
+        topBar = { AppBar("Transaction Types", onBack = onBack) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

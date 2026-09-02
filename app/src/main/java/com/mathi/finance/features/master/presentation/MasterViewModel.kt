@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.mathi.finance.core.network.SupabaseClient
 import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.TransactionType
+import com.mathi.finance.features.master.domain.model.instalment_data
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -109,6 +110,54 @@ class MasterViewModel : ViewModel() {
                         }
                     }
                 fetchInterests()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
+            }
+        }
+    }
+    fun fetchInstalment() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val result = SupabaseClient.client.from("installment_tenure")
+                    .select()
+                    .decodeList<instalment_data>()
+                _uiState.update {
+                   it.copy(
+                       instalmentList = result as ArrayList<instalment_data>,
+                       isLoading = false
+                   )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun addInstalment(interest: instalment_data) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                SupabaseClient.client.from("installment_tenure")
+                    .insert(interest)
+                fetchInstalment()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
+            }
+        }
+    }
+
+    fun updateInstalment(interest: instalment_data) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                SupabaseClient.client.from("installment_tenure")
+                    .update(interest) {
+                        filter {
+                            eq("id", interest.id ?: 0)
+                        }
+                    }
+                fetchInstalment()
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
             }

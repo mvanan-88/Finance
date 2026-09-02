@@ -24,33 +24,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.features.master.domain.model.master_data
 import com.mathi.finance.ui.presentation.AppBar
 
 @Composable
-fun MasterScreen() {
+fun MasterScreen(onSignOut: () -> Unit) {
     var selectedId by remember { mutableStateOf<String?>(null) }
     
     if (selectedId == null) {
-        MasterListScreen(onItemSelected = { selectedId = it })
+        MasterListScreen(onItemSelected = { selectedId = it }, onSignOut = onSignOut)
     } else {
         when (selectedId) {
-            "1" -> TransactionTypeScreen()
-            "2" -> InterestRateScreen()
+            "1" -> TransactionTypeScreen(onBack = { selectedId = null })
+            "2" -> InterestRateScreen(onBack = { selectedId = null })
+            "3" -> InstalmentScreen(onBack = { selectedId = null })
         }
     }
 }
 
 @Composable
-fun MasterListScreen(onItemSelected: (String) -> Unit) {
+fun MasterListScreen(onItemSelected: (String) -> Unit, onSignOut: () -> Unit) {
     var list = ArrayList<master_data>()
     var md = master_data(id = "1",master="Transaction Type")
     list.add(md)
     md = master_data(id = "2",master="Interest Rates")
     list.add(md)
+    md = master_data(id = "3",master="Instalment Tenures")
+    list.add(md)
     Scaffold(
-        topBar = { AppBar("Transactions") }) { innerPadding ->
+        topBar = { AppBar("Master Data", onSignOut = onSignOut) },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

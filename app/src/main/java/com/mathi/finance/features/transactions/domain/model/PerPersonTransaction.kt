@@ -10,5 +10,6 @@ data class PerPersonTransaction(
     val transaction_type_id: Int,
     val interest_rate_id: Int? = null,
     val amount: Float,
+    val instalment_tenure_id: Int? = null,
     val created_by: Int,
 )
