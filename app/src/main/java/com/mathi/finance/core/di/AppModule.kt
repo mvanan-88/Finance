@@ -28,7 +28,7 @@ val appModule = module {
     single<NetworkObserver> { ConnectivityObserver(androidContext()) }
     
     viewModel { LoginViewModel(get()) }
-    viewModel { MasterViewModel() }
+    viewModel { MasterViewModel(get()) }
     viewModel { TransactionViewModel(get()) }
     viewModel { ContactViewModel(get(), get(), get(), get()) }
 }

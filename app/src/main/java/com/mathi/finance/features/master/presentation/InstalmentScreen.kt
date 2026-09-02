@@ -51,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.instalment_data
 import com.mathi.finance.ui.presentation.AppBar
 import kotlinx.coroutines.launch

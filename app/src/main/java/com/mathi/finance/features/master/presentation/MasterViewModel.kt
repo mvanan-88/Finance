@@ -3,6 +3,7 @@ package com.mathi.finance.features.master.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mathi.finance.core.network.SupabaseClient
+import com.mathi.finance.core.prefs.PreferenceManager
 import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.master.domain.model.instalment_data
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MasterViewModel : ViewModel() {
+class MasterViewModel(private val preferenceManager: PreferenceManager) : ViewModel() {
+    private val currentUserId = preferenceManager.getUserId()
 
     private val _uiState = MutableStateFlow(MasterUIState())
     val listState: StateFlow<MasterUIState> = _uiState.asStateFlow()
@@ -24,7 +26,9 @@ class MasterViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val result = SupabaseClient.client.from("transaction_type")
-                    .select()
+                    .select {
+                        filter { eq("created_by", currentUserId) }
+                    }
                     .decodeList<TransactionType>()
                 _uiState.update {
                    it.copy(
@@ -42,6 +46,7 @@ class MasterViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                // Assuming transaction_type doesn't have a created_by field based on its model definition
                 SupabaseClient.client.from("transaction_type")
                     .insert(transaction)
                 fetchTransactions()
@@ -72,7 +77,9 @@ class MasterViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val result = SupabaseClient.client.from("interest_rates")
-                    .select()
+                    .select {
+                        filter { eq("created_by", currentUserId) }
+                    }
                     .decodeList<InterestRates>()
                 _uiState.update {
                    it.copy(
@@ -90,8 +97,10 @@ class MasterViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                // InterestRates model already has created_by
+                val interestWithUser = interest.copy(created_by = currentUserId)
                 SupabaseClient.client.from("interest_rates")
-                    .insert(interest)
+                    .insert(interestWithUser)
                 fetchInterests()
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }
@@ -120,7 +129,9 @@ class MasterViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val result = SupabaseClient.client.from("installment_tenure")
-                    .select()
+                    .select {
+                        filter { eq("created_by", currentUserId) }
+                    }
                     .decodeList<instalment_data>()
                 _uiState.update {
                    it.copy(
@@ -138,8 +149,10 @@ class MasterViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                // instalment_data model has created_by
+                val instalmentWithUser = interest.copy(created_by = currentUserId)
                 SupabaseClient.client.from("installment_tenure")
-                    .insert(interest)
+                    .insert(instalmentWithUser)
                 fetchInstalment()
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.localizedMessage) }

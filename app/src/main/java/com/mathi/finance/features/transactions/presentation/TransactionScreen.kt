@@ -12,12 +12,40 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -142,7 +170,7 @@ fun TransactionScreen(
                                         )
                                     } else if (instalmentTenure != null) {
                                         Text(
-                                            text = if (transaction.transactionType?.name == "Installment") "Tenure: ${instalmentTenure} weeks" else "Tenure: ${instalmentTenure} days",
+                                            text = if (transaction.transactionType?.name == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.secondary
                                         )
@@ -225,83 +253,87 @@ fun TransactionScreen(
 
                     // Interest Rate or Tenure Field
                     if (selectedType != null) {
-                        if (selectedType?.id == 2) {
-                            // Interest Rate Dropdown
-                            ExposedDropdownMenuBox(
-                                expanded = interestExpanded,
-                                onExpandedChange = { interestExpanded = !interestExpanded },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                TextField(
-                                    value = if (selectedInterestRate != null) "${selectedInterestRate?.interest_rate}%" else "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("Interest Rate") },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = interestExpanded) },
-                                    modifier = Modifier
-                                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                        .fillMaxWidth()
-                                )
-                                ExposedDropdownMenu(
+                        when (selectedType?.id) {
+                            2 -> {
+                                // Interest Rate Dropdown
+                                ExposedDropdownMenuBox(
                                     expanded = interestExpanded,
-                                    onDismissRequest = { interestExpanded = false }
+                                    onExpandedChange = { interestExpanded = !interestExpanded },
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    uiState.interestRates.forEach { rate ->
-                                        DropdownMenuItem(
-                                            text = { Text("${rate.interest_rate}%") },
-                                            onClick = {
-                                                selectedInterestRate = rate
-                                                interestExpanded = false
-                                            }
-                                        )
+                                    TextField(
+                                        value = if (selectedInterestRate != null) "${selectedInterestRate?.interest_rate}%" else "",
+                                        onValueChange = {},
+                                        readOnly = true,
+                                        label = { Text("Interest Rate") },
+                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = interestExpanded) },
+                                        modifier = Modifier
+                                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                            .fillMaxWidth()
+                                    )
+                                    ExposedDropdownMenu(
+                                        expanded = interestExpanded,
+                                        onDismissRequest = { interestExpanded = false }
+                                    ) {
+                                        uiState.interestRates.forEach { rate ->
+                                            DropdownMenuItem(
+                                                text = { Text("${rate.interest_rate}%") },
+                                                onClick = {
+                                                    selectedInterestRate = rate
+                                                    interestExpanded = false
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        } else if (selectedType?.id == 1) {
-                            // Instalment Dropdown
-                            ExposedDropdownMenuBox(
-                                expanded = instalmentExpanded,
-                                onExpandedChange = { instalmentExpanded = !instalmentExpanded },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                TextField(
-                                    value = if (selectedInstalment != null) "${selectedInstalment?.tenure} weeks" else "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("Instalment Tenure") },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = instalmentExpanded) },
-                                    modifier = Modifier
-                                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                        .fillMaxWidth()
-                                )
-                                ExposedDropdownMenu(
+                            1 -> {
+                                // Instalment Dropdown
+                                ExposedDropdownMenuBox(
                                     expanded = instalmentExpanded,
-                                    onDismissRequest = { instalmentExpanded = false }
+                                    onExpandedChange = { instalmentExpanded = !instalmentExpanded },
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    uiState.instalmentList.forEach { item ->
-                                        DropdownMenuItem(
-                                            text = { Text("${item.tenure} weeks") },
-                                            onClick = {
-                                                selectedInstalment = item
-                                                instalmentExpanded = false
-                                            }
-                                        )
+                                    TextField(
+                                        value = if (selectedInstalment != null) "${selectedInstalment?.tenure} weeks" else "",
+                                        onValueChange = {},
+                                        readOnly = true,
+                                        label = { Text("Instalment Tenure") },
+                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = instalmentExpanded) },
+                                        modifier = Modifier
+                                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                            .fillMaxWidth()
+                                    )
+                                    ExposedDropdownMenu(
+                                        expanded = instalmentExpanded,
+                                        onDismissRequest = { instalmentExpanded = false }
+                                    ) {
+                                        uiState.instalmentList.forEach { item ->
+                                            DropdownMenuItem(
+                                                text = { Text("${item.tenure} weeks") },
+                                                onClick = {
+                                                    selectedInstalment = item
+                                                    instalmentExpanded = false
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        } else {
-                            // Tenure TextField for other transaction types
-                            TextField(
-                                value = tenureInput,
-                                onValueChange = { input ->
-                                    if (input.isEmpty() || input.toIntOrNull() != null) {
-                                        tenureInput = input
-                                    }
-                                },
-                                label = { Text("Tenure (weeks)") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            else -> {
+                                // Tenure TextField for other transaction types
+                                TextField(
+                                    value = tenureInput,
+                                    onValueChange = { input ->
+                                        if (input.isEmpty() || input.toIntOrNull() != null) {
+                                            tenureInput = input
+                                        }
+                                    },
+                                    label = { Text("Tenure (weeks)") },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
 
@@ -323,11 +355,6 @@ fun TransactionScreen(
                             val amount = amountInput.toFloatOrNull() ?: 0f
                             val interestId = if (selectedType?.id == 2) selectedInterestRate?.id else null
                             val instalmentId = if (selectedType?.id == 1) selectedInstalment?.id else null
-                            val tenure = when {
-                                selectedType?.id == 2 -> null
-                                selectedType?.id == 1 -> selectedInstalment?.tenure
-                                else -> tenureInput.toIntOrNull()
-                            }
                             val contactId = selectedContact?.id
                             val typeId = selectedType?.id
                             val currentUserId = viewModel.currentUserId

@@ -92,6 +92,7 @@ class TransactionViewModel(
                     .select {
                         filter {
                             eq("status", 1)
+                            eq("created_by", currentUserId)
                         }
                     }
                     .decodeList<TransactionType>()
@@ -109,6 +110,7 @@ class TransactionViewModel(
                     .select {
                         filter {
                             eq("status", 1)
+                            eq("created_by", currentUserId)
                         }
                     }
                     .decodeList<InterestRates>()
@@ -126,6 +128,7 @@ class TransactionViewModel(
                     .select {
                         filter {
                             eq("status", 1)
+                            eq("created_by", currentUserId)
                         }
                     }
                     .decodeList<instalment_data>()
