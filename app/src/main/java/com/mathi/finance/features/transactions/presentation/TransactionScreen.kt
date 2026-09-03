@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -56,6 +59,7 @@ import com.mathi.finance.features.contacts.domain.model.Contact
 import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
+import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -78,6 +82,16 @@ fun TransactionScreen(
     modifier: Modifier = Modifier,
     viewModel: TransactionViewModel = koinViewModel()
 ) {
+    var selectedTransaction by remember { mutableStateOf<TransactionSummary?>(null) }
+
+    if (selectedTransaction != null) {
+        TransactionDetailScreen(
+            transaction = selectedTransaction!!,
+            onBack = { selectedTransaction = null }
+        )
+        return
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -124,15 +138,21 @@ fun TransactionScreen(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(uiState.transactions) { transaction ->
-                    val contactName = transaction.contact?.name ?: "Unknown"
-                    val typeName = transaction.transactionType?.name ?: "Unknown"
-                    val interestRate = transaction.interestRate?.rate
-                    val instalmentTenure = transaction.instalment_tenure?.tenure
+                    val contactName = transaction.name ?: "Unknown"
+                    val typeName = transaction.transaction_type ?: "Unknown"
+                    val interestRate = transaction.interest_rate
+                    val instalmentTenure = transaction.tenure
+
+                    // Flag Logic
+                    val showFlag = remember(transaction) {
+                        transaction.days_difference in 21..<30
+                    }
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clickable { selectedTransaction = transaction },
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -144,11 +164,34 @@ fun TransactionScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
-                                    Text(
-                                        text = contactName,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = contactName,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        when(transaction.risk_level){
+                                            1 ->{
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Icon(
+                                                    imageVector = Icons.Default.Flag,
+                                                    contentDescription = "Alert",
+                                                    tint = Color.Red.copy(alpha = 0.4f),
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                            2 -> {
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Icon(
+                                                    imageVector = Icons.Default.Flag,
+                                                    contentDescription = "Alert",
+                                                    tint = Color.Red,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
+
+                                    }
                                     Text(
                                         text = typeName,
                                         style = MaterialTheme.typography.bodySmall,
@@ -157,7 +200,7 @@ fun TransactionScreen(
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
                                     Text(
-                                        text = "$${transaction.amount}",
+                                        text = "₹${transaction.amount}",
                                         style = MaterialTheme.typography.titleLarge,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Black
@@ -170,7 +213,7 @@ fun TransactionScreen(
                                         )
                                     } else if (instalmentTenure != null) {
                                         Text(
-                                            text = if (transaction.transactionType?.name == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
+                                            text = if (transaction.transaction_type == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.secondary
                                         )

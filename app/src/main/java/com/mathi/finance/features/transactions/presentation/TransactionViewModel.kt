@@ -8,10 +8,10 @@ import com.mathi.finance.features.contacts.domain.model.Contact
 import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.master.domain.model.instalment_data
+import com.mathi.finance.features.transactions.domain.model.PaymentsModel
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
-import com.mathi.finance.features.transactions.domain.model.TransactionDetails
+import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +20,10 @@ import kotlinx.coroutines.launch
 
 data class TransactionUIState(
     val isLoading: Boolean = false,
-    val transactions: List<TransactionDetails> = emptyList(),
+    val paymentCompleted: Boolean = false,
+    val transactions: List<TransactionSummary> = emptyList(),
     val contacts: List<Contact> = emptyList(),
+    val paymentHistory: List<PaymentsModel> = emptyList(),
     val transactionTypes: List<TransactionType> = emptyList(),
     val interestRates: List<InterestRates> = emptyList(),
     val instalmentList: List<instalment_data> = emptyList(),
@@ -34,6 +36,7 @@ class TransactionViewModel(
     private val _uiState = MutableStateFlow(TransactionUIState())
     val uiState: StateFlow<TransactionUIState> = _uiState.asStateFlow()
     val currentUserId = preferenceManager.getUserId()
+
     init {
         fetchInitialData()
     }
@@ -47,20 +50,20 @@ class TransactionViewModel(
     }
 
     fun fetchTransactions() {
-        
+
         if (currentUserId == -1) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 // Postgrest Join: fetches related data from linked tables
-                val result = SupabaseClient.client.from("per_person_transaction")
-                    .select(columns = Columns.raw("*, transaction_type(name), interest_rates(interest_rate), installment_tenure(tenure), contacts(name)")) {
+                val result = SupabaseClient.client.from("transaction_summary_view")
+                    .select() {
                         filter {
                             eq("created_by", currentUserId)
                         }
                     }
-                    .decodeList<TransactionDetails>()
+                    .decodeList<TransactionSummary>()
                 _uiState.update { it.copy(transactions = result, isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
@@ -148,6 +151,45 @@ class TransactionViewModel(
                 fetchTransactions()
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
+            }
+        }
+    }
+
+    fun makePayment(id: Int, amount_paid: String, note: String) {
+        val payment = PaymentsModel(
+            loan_id = id,
+            amount_paid = amount_paid.toFloat(),
+            notes = note,
+            created_by = currentUserId,
+        )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                SupabaseClient.client.from("payments_table")
+                    .insert(payment)
+                fetchPaymentHistory(id)
+                _uiState.update { it.copy(paymentCompleted = true) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
+            }
+        }
+    }
+
+
+    fun fetchPaymentHistory(loanId:Int) {
+        viewModelScope.launch {
+            try {
+                val result = SupabaseClient.client.from("payments_table")
+                    .select {
+                        filter {
+                            eq("created_by", currentUserId)
+                            eq("loan_id", loanId)
+                        }
+                    }
+                    .decodeList<PaymentsModel>()
+                _uiState.update { it.copy(paymentHistory = result) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.localizedMessage) }
             }
         }
     }

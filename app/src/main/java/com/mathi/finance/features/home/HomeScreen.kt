@@ -17,19 +17,17 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,87 +35,130 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.ui.presentation.AppBar
+import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @Composable
 fun HomeScreen(
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    viewModel: HomeViewModel = koinViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState(HomeUIState())
+    val colorScheme = MaterialTheme.colorScheme
+    
+    val actions = remember(colorScheme) {
+        listOf(
+            QuickActionItem("Scan Receipt", Icons.Default.QrCodeScanner, colorScheme.secondary),
+            QuickActionItem("Send Money", Icons.Default.Send, colorScheme.tertiary),
+            QuickActionItem("Budget", Icons.Default.PieChart, colorScheme.primary),
+            QuickActionItem("Insight", Icons.Default.Insights, colorScheme.onSurfaceVariant)
+        )
+    }
+
     Scaffold(
         topBar = { AppBar("Dashboard", onSignOut = onSignOut) },
         containerColor = Color.Transparent
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding)
-                .padding(16.dp)
+                .padding(innerPadding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Summary Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Box(
+            // Summary Card (Uncommented and standardized)
+            item {
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp)
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
-                    Column(modifier = Modifier.align(Alignment.TopStart)) {
-                        Text(
-                            text = "Total Balance",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "$12,450.00",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = Color.White,
-                            fontWeight = FontWeight.Black
-                        )
-                    }
-                    
-                    Row(
-                        modifier = Modifier.align(Alignment.BottomStart),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp)
                     ) {
-                        SummaryMini(label = "Income", value = "+$2,100", icon = Icons.Default.TrendingUp)
-                        SummaryMini(label = "Expense", value = "-$850", icon = Icons.Default.TrendingDown)
+                        Column(modifier = Modifier.align(Alignment.TopStart)) {
+                            Text(
+                                text = "Total Balance",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "₹${String.format(Locale.getDefault(), "%.2f", uiState.summary?.totalActiveLended ?: 0f)}",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = Color.White,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.align(Alignment.BottomStart),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            SummaryMini(label = "Income", value = "+₹2,100", icon = Icons.AutoMirrored.Filled.TrendingUp)
+                            SummaryMini(label = "Expense", value = "-₹850", icon = Icons.AutoMirrored.Filled.TrendingDown)
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                RecoveryProgressCard(
+                    totalOutstanding = uiState.summary?.totalActiveLended ?: 0f,
+                    totalRecovered = uiState.summary?.totalActiveRecovered ?: 0f
+                )
+            }
 
-            Text(
-                text = "Quick Actions",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            item {
+                LoanStatusPieChart(
+                    activeCount = uiState.summary?.activeLoans ?: 0,
+                    completedCount = uiState.summary?.completedLoans ?: 0
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                TopDebtorChart(debtors = uiState.topDebtors)
+            }
 
-            val actions = listOf(
-                QuickActionItem("Scan Receipt", Icons.Default.QrCodeScanner, MaterialTheme.colorScheme.secondary),
-                QuickActionItem("Send Money", Icons.Default.Send, MaterialTheme.colorScheme.tertiary),
-                QuickActionItem("Budget", Icons.Default.PieChart, MaterialTheme.colorScheme.primary),
-                QuickActionItem("Insight", Icons.Default.Insights, MaterialTheme.colorScheme.onSurfaceVariant)
-            )
+            item {
+                Text(
+                    text = "Quick Actions",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(actions) { action ->
-                    ActionCard(action)
+            // Grid-like layout for Quick Actions using chunks in LazyColumn
+            val actionRows = actions.chunked(2)
+            itemsIndexed(actionRows) { _, rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    rowItems.forEach { action ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            ActionCard(action)
+                        }
+                    }
+                    if (rowItems.size < 2) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

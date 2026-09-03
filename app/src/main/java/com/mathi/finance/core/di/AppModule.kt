@@ -8,6 +8,7 @@ import com.mathi.finance.core.prefs.PreferenceManager
 import com.mathi.finance.features.auth.presentation.LoginViewModel
 import com.mathi.finance.features.contacts.data.repository.ContactRepository
 import com.mathi.finance.features.contacts.presentation.ContactViewModel
+import com.mathi.finance.features.home.HomeViewModel
 import com.mathi.finance.features.master.presentation.MasterViewModel
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
 import org.koin.android.ext.koin.androidContext
@@ -31,4 +32,5 @@ val appModule = module {
     viewModel { MasterViewModel(get()) }
     viewModel { TransactionViewModel(get()) }
     viewModel { ContactViewModel(get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get()) }
 }
