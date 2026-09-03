@@ -4,15 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mathi.finance.core.network.SupabaseClient
 import com.mathi.finance.core.prefs.PreferenceManager
-import com.mathi.finance.features.contacts.domain.model.Contact
-import com.mathi.finance.features.transactions.domain.model.TransactionSummary
-import com.mathi.finance.features.transactions.presentation.TransactionUIState
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
