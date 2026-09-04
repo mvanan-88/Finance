@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.core.util.WhatsAppHelper
+import com.mathi.finance.ui.WhatsAppVector
 
 /**
  * A Jetpack Compose button that triggers a WhatsApp reminder.
@@ -40,7 +41,7 @@ fun WhatsAppReminderButton(
         )
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.Chat,
+            imageVector = WhatsAppVector,
             contentDescription = null
         )
         Spacer(modifier = Modifier.width(8.dp))
