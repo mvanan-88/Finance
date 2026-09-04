@@ -30,12 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mathi.finance.R
+import com.mathi.finance.core.theme.BackgroundDark
+import com.mathi.finance.core.theme.LogoDark
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -59,8 +62,8 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+                        LogoDark,
+                        BackgroundDark
                     )
                 )
             )

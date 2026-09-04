@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.ui.presentation.AppBar
+import com.mathi.finance.ui.presentation.EmptyState
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
@@ -105,8 +107,18 @@ fun TransactionTypeScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             }
-            if (uiState.transactionList.isNotEmpty()) {
-                LazyColumn(modifier = Modifier.fillMaxHeight()) {
+            if (!uiState.isLoading && uiState.transactionList.isEmpty()) {
+                EmptyState(onActionClick = {
+                    editingItem = null
+                    transactionTypeName = ""
+                    transactionStatus = 1
+                    showBottomSheet = true
+                })
+            } else if (uiState.transactionList.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentPadding = PaddingValues(bottom = 32.dp)
+                ) {
                     items(items = uiState.transactionList, itemContent = { item ->
                         Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),

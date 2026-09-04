@@ -2,16 +2,17 @@ package com.mathi.finance.core.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryBlue = Color(0xFF0056D2)
-val SecondaryBlue = Color(0xFFE5F1FF)
-val GrowthGreen = Color(0xFF00C853)
-val ErrorRed = Color(0xFFD32F2F)
-val BackgroundGray = Color(0xFFF8F9FA)
-val SurfaceWhite = Color(0xFFFFFFFF)
-val TextDark = Color(0xFF212529)
-val TextSecondary = Color(0xFF6C757D)
+val LogoDark = Color(0xFF0F172A) // Deep navy-black from logo background
+val LogoBlue = Color(0xFF0EA5E9) // Vibrant blue from logo 'M'
+val LogoGreen = Color(0xFF10B981) // Growth green from logo arrow
 
-// Dark Mode variants
-val DarkPrimary = Color(0xFF4D91FF)
-val DarkBackground = Color(0xFF121212)
-val DarkSurface = Color(0xFF1E1E1E)
+val BackgroundLight = Color(0xFFF8FAFC)
+val BackgroundDark = Color(0xFF020617)
+
+val SurfaceWhite = Color(0xFFFFFFFF)
+val SurfaceDark = Color(0xFF1E293B)
+
+val TextDark = Color(0xFF0F172A)
+val TextLight = Color(0xFFF1F5F9)
+
+val ErrorRed = Color(0xFFEF4444)

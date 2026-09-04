@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.mathi.finance.core.theme.MyFinanceTheme
 import com.mathi.finance.features.auth.presentation.LoginScreen
 import com.mathi.finance.features.auth.presentation.LoginViewModel
@@ -57,8 +59,8 @@ class MainActivity : ComponentActivity() {
                             .background(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(
-                                        Color(0xFFF8F9FA),
-                                        Color(0xFFE5F1FF)
+                                        MaterialTheme.colorScheme.background,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                                     )
                                 )
                             )
@@ -68,7 +70,8 @@ class MainActivity : ComponentActivity() {
                             containerColor = Color.Transparent,
                             bottomBar = {
                                 NavigationBar(
-                                    containerColor = Color.Transparent
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    tonalElevation = 8.dp
                                 ) {
                                     NavigationBarItem(
                                         selected = currentScreen == Screen.Home,

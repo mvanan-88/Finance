@@ -3,6 +3,7 @@ package com.mathi.finance.features.transactions.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,6 +62,7 @@ import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
+import com.mathi.finance.ui.presentation.EmptyState
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
@@ -140,83 +142,90 @@ fun TransactionScreen(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(uiState.transactions) { transaction ->
-                    val contactName = transaction.name
-                    val typeName = transaction.transaction_type
-                    val interestRate = transaction.interest_rate
-                    val instalmentTenure = transaction.tenure
+            if (!uiState.isLoading && uiState.transactions.isEmpty()) {
+                EmptyState(onActionClick = { showBottomSheet = true })
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(uiState.transactions) { transaction ->
+                        val contactName = transaction.name
+                        val typeName = transaction.transaction_type
+                        val interestRate = transaction.interest_rate
+                        val instalmentTenure = transaction.tenure
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clickable { selectedTransaction = transaction },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = contactName,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        when (transaction.risk_level) {
-                                            1 -> {
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Icon(
-                                                    imageVector = Icons.Default.Flag,
-                                                    contentDescription = "Alert",
-                                                    tint = Color.Red.copy(alpha = 0.4f),
-                                                    modifier = Modifier.size(16.dp)
-                                                )
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clickable { selectedTransaction = transaction },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = contactName,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            when (transaction.risk_level) {
+                                                1 -> {
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Icon(
+                                                        imageVector = Icons.Default.Flag,
+                                                        contentDescription = "Alert",
+                                                        tint = Color.Red.copy(alpha = 0.4f),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
+
+                                                2 -> {
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Icon(
+                                                        imageVector = Icons.Default.Flag,
+                                                        contentDescription = "Alert",
+                                                        tint = Color.Red,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
                                             }
 
-                                            2 -> {
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Icon(
-                                                    imageVector = Icons.Default.Flag,
-                                                    contentDescription = "Alert",
-                                                    tint = Color.Red,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
                                         }
-
+                                        Text(
+                                            text = typeName,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                    Text(
-                                        text = typeName,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(
-                                        text = "₹${transaction.amount}",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                    if (interestRate != null) {
+                                    Column(horizontalAlignment = Alignment.End) {
                                         Text(
-                                            text = "Int: $interestRate%",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.secondary
+                                            text = "₹${transaction.amount}",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Black
                                         )
-                                    } else if (instalmentTenure != null) {
-                                        Text(
-                                            text = if (transaction.transaction_type == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
+                                        if (interestRate != null) {
+                                            Text(
+                                                text = "Int: $interestRate%",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        } else if (instalmentTenure != null) {
+                                            Text(
+                                                text = if (transaction.transaction_type == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
                                     }
                                 }
                             }

@@ -12,31 +12,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimary,
-    onPrimary = Color.White,
-    background = DarkBackground,
-    surface = DarkSurface,
-    onSurface = Color.White,
+    primary = LogoBlue,
+    onPrimary = BackgroundDark,
+    secondary = LogoGreen,
+    onSecondary = BackgroundDark,
+    background = BackgroundDark,
+    surface = SurfaceDark,
+    onSurface = TextLight,
     error = ErrorRed
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryBlue,
+    primary = LogoBlue,
     onPrimary = Color.White,
-    secondary = SecondaryBlue,
-    onSecondary = PrimaryBlue,
-    background = BackgroundGray,
+    secondary = LogoGreen,
+    onSecondary = Color.White,
+    background = BackgroundLight,
     surface = SurfaceWhite,
     onSurface = TextDark,
-    onSurfaceVariant = TextSecondary,
+    onSurfaceVariant = Color.Gray,
     error = ErrorRed
 )
 
 @Composable
 fun MyFinanceTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Disable dynamic color to enforce brand colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
