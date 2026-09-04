@@ -2,8 +2,6 @@ package com.mathi.finance.features.transactions.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mathi.finance.core.network.SupabaseClient
-import com.mathi.finance.core.prefs.PreferenceManager
 import com.mathi.finance.features.contacts.domain.model.Contact
 import com.mathi.finance.features.master.domain.model.InterestRates
 import com.mathi.finance.features.master.domain.model.TransactionType
@@ -11,7 +9,7 @@ import com.mathi.finance.features.master.domain.model.instalment_data
 import com.mathi.finance.features.transactions.domain.model.PaymentsModel
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
-import io.github.jan.supabase.postgrest.from
+import com.mathi.finance.features.transactions.domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,11 +29,10 @@ data class TransactionUIState(
 )
 
 class TransactionViewModel(
-    private val preferenceManager: PreferenceManager
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TransactionUIState())
     val uiState: StateFlow<TransactionUIState> = _uiState.asStateFlow()
-    val currentUserId = preferenceManager.getUserId()
 
     init {
         fetchInitialData()
@@ -50,147 +47,100 @@ class TransactionViewModel(
     }
 
     fun fetchTransactions() {
-
-        if (currentUserId == -1) return
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                // Postgrest Join: fetches related data from linked tables
-                val result = SupabaseClient.client.from("transaction_summary_view")
-                    .select() {
-                        filter {
-                            eq("created_by", currentUserId)
-                        }
-                    }
-                    .decodeList<TransactionSummary>()
-                _uiState.update { it.copy(transactions = result, isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
-            }
+            transactionRepository.fetchTransactions()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(transactions = result, isLoading = false) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
+                }
         }
     }
 
     fun fetchContacts() {
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("contacts")
-                    .select {
-                        filter {
-                            eq("created_by", currentUserId)
-                        }
-                    }
-                    .decodeList<Contact>()
-                _uiState.update { it.copy(contacts = result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            transactionRepository.fetchContacts()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(contacts = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage) }
+                }
         }
     }
 
     fun fetchTransactionTypes() {
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("transaction_type")
-                    .select {
-                        filter {
-                            eq("status", 1)
-                            eq("created_by", currentUserId)
-                        }
-                    }
-                    .decodeList<TransactionType>()
-                _uiState.update { it.copy(transactionTypes = result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            transactionRepository.fetchTransactionTypes()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(transactionTypes = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage) }
+                }
         }
     }
 
     fun fetchInterestRates() {
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("interest_rates")
-                    .select {
-                        filter {
-                            eq("status", 1)
-                            eq("created_by", currentUserId)
-                        }
-                    }
-                    .decodeList<InterestRates>()
-                _uiState.update { it.copy(interestRates = result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            transactionRepository.fetchInterestRates()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(interestRates = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage) }
+                }
         }
     }
 
     fun fetchInstalments() {
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("installment_tenure")
-                    .select {
-                        filter {
-                            eq("status", 1)
-                            eq("created_by", currentUserId)
-                        }
-                    }
-                    .decodeList<instalment_data>()
-                _uiState.update { it.copy(instalmentList = result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            transactionRepository.fetchInstalments()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(instalmentList = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage) }
+                }
         }
     }
 
     fun addTransaction(transaction: PerPersonTransaction) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                SupabaseClient.client.from("per_person_transaction")
-                    .insert(transaction)
-                fetchTransactions()
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
-            }
+            transactionRepository.addTransaction(transaction)
+                .onSuccess { fetchTransactions() }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
+                }
         }
     }
 
     fun makePayment(id: Int, amount_paid: String, note: String) {
-        val payment = PaymentsModel(
-            loan_id = id,
-            amount_paid = amount_paid.toFloat(),
-            notes = note,
-            created_by = currentUserId,
-        )
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                SupabaseClient.client.from("payments_table")
-                    .insert(payment)
-                fetchPaymentHistory(id)
-                _uiState.update { it.copy(paymentCompleted = true) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
-            }
+            transactionRepository.makePayment(id, amount_paid.toFloat(), note)
+                .onSuccess {
+                    fetchPaymentHistory(id)
+                    _uiState.update { it.copy(paymentCompleted = true, isLoading = false) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage, isLoading = false) }
+                }
         }
     }
 
-
-    fun fetchPaymentHistory(loanId:Int) {
+    fun fetchPaymentHistory(loanId: Int) {
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("payments_table")
-                    .select {
-                        filter {
-                            eq("created_by", currentUserId)
-                            eq("loan_id", loanId)
-                        }
-                    }
-                    .decodeList<PaymentsModel>()
-                _uiState.update { it.copy(paymentHistory = result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            transactionRepository.fetchPaymentHistory(loanId)
+                .onSuccess { result ->
+                    _uiState.update { it.copy(paymentHistory = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage) }
+                }
         }
     }
 }

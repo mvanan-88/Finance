@@ -1,37 +1,44 @@
 package com.mathi.finance.features.contacts.data.repository
 
 import com.mathi.finance.core.network.SupabaseClient
+import com.mathi.finance.core.prefs.PreferenceManager
 import com.mathi.finance.features.contacts.data.local.ContactDao
 import com.mathi.finance.features.contacts.data.local.ContactEntity
 import com.mathi.finance.features.contacts.domain.model.Contact
+import com.mathi.finance.features.contacts.domain.repository.ContactRepository
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ContactRepository(
-    private val contactDao: ContactDao
-) {
-    val contacts: Flow<List<Contact>> = contactDao.getAllContacts().map { entities ->
+class ContactRepositoryImpl(
+    private val contactDao: ContactDao,
+    private val preferenceManager: PreferenceManager
+) : ContactRepository {
+    private val currentUserId = preferenceManager.getUserId()
+
+    override val contacts: Flow<List<Contact>> = contactDao.getAllContacts().map { entities ->
         entities.map { it.toDomain() }
     }
 
-    suspend fun saveContactsLocally(contacts: List<Contact>, createdBy: Int) {
-        val entities = contacts.map { it.toEntity(createdBy) }
+    override suspend fun saveContactsLocally(contacts: List<Contact>) {
+        if (currentUserId == -1) return
+        val entities = contacts.map { it.toEntity(currentUserId) }
         contactDao.insertContacts(entities)
     }
 
-    suspend fun syncWithRemote(createdBy: Int) {
+    override suspend fun syncWithRemote() {
+        if (currentUserId == -1) return
         val unsynced = contactDao.getUnsyncedContacts()
         if (unsynced.isEmpty()) return
 
         try {
-            val contactsToSync = unsynced.map { it.toDomain().copy(created_by = createdBy) }
+            val contactsToSync = unsynced.map { it.toDomain().copy(created_by = currentUserId) }
             
             // Fetch existing to avoid duplicates as previously implemented
             val response = SupabaseClient.client.from("contacts")
                 .select {
                     filter {
-                        eq("created_by", createdBy)
+                        eq("created_by", currentUserId)
                     }
                 }
                 .decodeList<Contact>()

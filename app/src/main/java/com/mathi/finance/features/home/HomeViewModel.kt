@@ -2,10 +2,8 @@ package com.mathi.finance.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mathi.finance.core.network.SupabaseClient
-import com.mathi.finance.core.prefs.PreferenceManager
+import com.mathi.finance.features.home.domain.repository.HomeRepository
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
-import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,10 +11,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    preferenceManager: PreferenceManager,
+    private val homeRepository: HomeRepository,
     private val transactionViewModel: TransactionViewModel
 ) : ViewModel() {
-    val currentUser = preferenceManager.getUserId()
     private val _uiState = MutableStateFlow(HomeUIState())
     val uiState: StateFlow<HomeUIState> = _uiState.asStateFlow()
 
@@ -42,23 +39,16 @@ class HomeViewModel(
     }
 
     fun fetchIncomeExpense() {
-        if(currentUser == -1) return
         viewModelScope.launch {
-            try {
-                val result = SupabaseClient.client.from("dashboard_summary")
-                    .select {
-                        filter {
-                            eq("created_by", currentUser)
-                        }
-                    }
-                    .decodeSingleOrNull<HomeDashboardBasicData>()
-                _uiState.update { it.copy( summary =  result) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.localizedMessage) }
-            }
+            homeRepository.fetchDashboardSummary()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(summary = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage ?: "Unknown error") }
+                }
         }
     }
-
 }
 
 data class HomeUIState(

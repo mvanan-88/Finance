@@ -296,8 +296,8 @@ fun TransactionScreen(
 
                     // Interest Rate or Tenure Field
                     if (selectedType != null) {
-                        when (selectedType?.id) {
-                            2 -> {
+                        when (selectedType?.name) {
+                            "Interest" -> {
                                 // Interest Rate Dropdown
                                 ExposedDropdownMenuBox(
                                     expanded = interestExpanded,
@@ -330,7 +330,7 @@ fun TransactionScreen(
                                     }
                                 }
                             }
-                            1 -> {
+                            "Installment","Instalment" -> {
                                 // Instalment Dropdown
                                 ExposedDropdownMenuBox(
                                     expanded = instalmentExpanded,
@@ -396,13 +396,12 @@ fun TransactionScreen(
                     Button(
                         onClick = {
                             val amount = amountInput.toFloatOrNull() ?: 0f
-                            val interestId = if (selectedType?.id == 2) selectedInterestRate?.id else null
-                            val instalmentId = if (selectedType?.id == 1) selectedInstalment?.id else null
+                            val interestId = if (selectedType?.name.equals("Interest",false)) selectedInterestRate?.id else null
+                            val instalmentId = if (selectedType?.name.equals("Installment",false) || selectedType?.name.equals("Instalment",false) || selectedType?.name.equals("Instalment Tenure")) selectedInstalment?.id else null
                             val contactId = selectedContact?.id
                             val typeId = selectedType?.id
-                            val currentUserId = viewModel.currentUserId
 
-                            if (amount > 0 && contactId != null && typeId != null && currentUserId != -1) {
+                            if (amount > 0 && contactId != null && typeId != null) {
                                 val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
                                 val currentDate = sdf.format(Date())
 
@@ -413,7 +412,7 @@ fun TransactionScreen(
                                     interest_rate_id = interestId,
                                     amount = amount,
                                     instalment_tenure_id = instalmentId,
-                                    created_by = currentUserId
+                                    created_by = 0 // Repository overrides this with the actual user ID
                                 )
                                 viewModel.addTransaction(transaction)
                                 

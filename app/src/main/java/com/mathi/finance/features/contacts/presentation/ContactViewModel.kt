@@ -5,9 +5,8 @@ import android.provider.ContactsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mathi.finance.core.network.NetworkObserver
-import com.mathi.finance.core.prefs.PreferenceManager
-import com.mathi.finance.features.contacts.data.repository.ContactRepository
 import com.mathi.finance.features.contacts.domain.model.Contact
+import com.mathi.finance.features.contacts.domain.repository.ContactRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +18,6 @@ import kotlinx.coroutines.withContext
 
 class ContactViewModel(
     application: Application,
-    private val preferenceManager: PreferenceManager,
     private val repository: ContactRepository,
     private val networkObserver: NetworkObserver
 ) : AndroidViewModel(application) {
@@ -44,14 +42,11 @@ class ContactViewModel(
         viewModelScope.launch {
             networkObserver.observe().collectLatest { status ->
                 if (status == NetworkObserver.Status.Available) {
-                    val currentUserId = preferenceManager.getUserId()
-                    if (currentUserId != -1) {
-                        try {
-                            repository.syncWithRemote(currentUserId)
-                            _syncStatus.value = "Auto-sync successful"
-                        } catch (e: Exception) {
-                            // Silently fail or log for auto-sync
-                        }
+                    try {
+                        repository.syncWithRemote()
+                        _syncStatus.value = "Auto-sync successful"
+                    } catch (e: Exception) {
+                        // Silently fail or log for auto-sync
                     }
                 }
             }
@@ -64,28 +59,17 @@ class ContactViewModel(
             val contactList = withContext(Dispatchers.IO) {
                 getContacts()
             }
-            
-            val currentUserId = preferenceManager.getUserId()
-            if (currentUserId != -1) {
-                repository.saveContactsLocally(contactList, currentUserId)
-            }
-            
+            repository.saveContactsLocally(contactList)
             _isLoading.value = false
         }
     }
 
     fun syncContacts() {
-        val currentUserId = preferenceManager.getUserId()
-        if (currentUserId == -1) {
-            _syncStatus.value = "User not logged in"
-            return
-        }
-
         viewModelScope.launch {
             _isLoading.value = true
             _syncStatus.value = "Syncing..."
             try {
-                repository.syncWithRemote(currentUserId)
+                repository.syncWithRemote()
                 _syncStatus.value = "Sync successful"
             } catch (e: Exception) {
                 _syncStatus.value = "Sync failed: ${e.localizedMessage}"

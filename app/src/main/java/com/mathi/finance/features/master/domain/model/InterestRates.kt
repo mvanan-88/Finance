@@ -8,5 +8,5 @@ data class InterestRates(
     val created_at: String,
     val interest_rate : Float,
     val status: Int,
-    val created_by: Int
+    val created_by: Int?=null
 )

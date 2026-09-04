@@ -240,7 +240,6 @@ fun InterestRateScreen(
                                         interest_rate = rate,
                                         created_at = currentDate,
                                         status = transactionStatus,
-                                        created_by = 1
                                     )
                                     viewModel.addInterest(newType)
                                 } else {
