@@ -14,11 +14,15 @@ import com.mathi.finance.features.contacts.presentation.ContactViewModel
 import com.mathi.finance.features.home.HomeViewModel
 import com.mathi.finance.features.home.data.repository.HomeRepositoryImpl
 import com.mathi.finance.features.home.domain.repository.HomeRepository
+import com.mathi.finance.features.home.presentation.DashboardViewModel
 import com.mathi.finance.features.master.data.repository.MasterRepositoryImpl
 import com.mathi.finance.features.master.domain.repository.MasterRepository
 import com.mathi.finance.features.master.presentation.MasterViewModel
 import com.mathi.finance.features.transactions.data.repository.TransactionRepositoryImpl
 import com.mathi.finance.features.transactions.domain.repository.TransactionRepository
+import com.mathi.finance.features.transactions.presentation.BorrowerLedgerViewModel
+import com.mathi.finance.features.transactions.presentation.CollectionLogViewModel
+import com.mathi.finance.features.transactions.presentation.RiskReportViewModel
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -49,4 +53,8 @@ val appModule = module {
     viewModel { TransactionViewModel(get()) }
     viewModel { ContactViewModel(androidApplication(), get(), get()) }
     viewModel { HomeViewModel(get(), get()) }
+    viewModel { DashboardViewModel(get()) }
+    viewModel { RiskReportViewModel(get()) }
+    viewModel { BorrowerLedgerViewModel(get()) }
+    viewModel { CollectionLogViewModel(get()) }
 }

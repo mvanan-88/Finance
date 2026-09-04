@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mathi.finance.features.contacts.presentation.ContactScreen
 import com.mathi.finance.features.master.domain.model.master_data
 import com.mathi.finance.ui.presentation.AppBar
 
@@ -41,19 +42,20 @@ fun MasterScreen(onSignOut: () -> Unit) {
             "1" -> TransactionTypeScreen(onBack = { selectedId = null })
             "2" -> InterestRateScreen(onBack = { selectedId = null })
             "3" -> InstalmentScreen(onBack = { selectedId = null })
+            "4" -> ContactScreen() // Contacts moved here
         }
     }
 }
 
 @Composable
 fun MasterListScreen(onItemSelected: (String) -> Unit, onSignOut: () -> Unit) {
-    val list = ArrayList<master_data>()
-    var md = master_data(id = "1", master = "Transaction Type")
-    list.add(md)
-    md = master_data(id = "2", master = "Interest Rates")
-    list.add(md)
-    md = master_data(id = "3", master = "Instalment Tenures")
-    list.add(md)
+    val list = listOf(
+        master_data(id = "1", master = "Transaction Type"),
+        master_data(id = "2", master = "Interest Rates"),
+        master_data(id = "3", master = "Instalment Tenures"),
+        master_data(id = "4", master = "Contacts")
+    )
+    
     Scaffold(
         topBar = { AppBar("Master Data", onSignOut = onSignOut) },
         containerColor = Color.Transparent

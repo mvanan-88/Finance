@@ -2,6 +2,8 @@ package com.mathi.finance.ui.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.mathi.finance.core.theme.LocalThemeState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,13 +27,15 @@ fun AppBar(
     onSignOut: (() -> Unit)? = null,
     onBack: (() -> Unit)? = null
 ) {
+    val themeState = LocalThemeState.current
+    
     CenterAlignedTopAppBar(
         title = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         navigationIcon = {
@@ -39,18 +44,25 @@ fun AppBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
         },
         actions = {
+            IconButton(onClick = { themeState.toggleTheme() }) {
+                Icon(
+                    imageVector = if (themeState.isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Toggle Theme",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
             if (onSignOut != null) {
                 IconButton(onClick = onSignOut) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Logout,
                         contentDescription = "Sign Out",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

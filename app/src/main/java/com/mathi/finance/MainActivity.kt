@@ -5,14 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +20,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import com.mathi.finance.features.auth.presentation.LoginViewModel
 import com.mathi.finance.features.contacts.presentation.ContactScreen
 import com.mathi.finance.features.home.HomeScreen
 import com.mathi.finance.features.master.presentation.MasterScreen
+import com.mathi.finance.features.reports.ReportsScreen
 import com.mathi.finance.features.transactions.presentation.TransactionScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -43,7 +45,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyFinanceTheme {
+            val systemTheme = isSystemInDarkTheme()
+            var isDarkMode by remember { mutableStateOf(systemTheme) }
+
+            MyFinanceTheme(
+                darkTheme = isDarkMode,
+                onThemeToggle = { isDarkMode = !isDarkMode }
+            ) {
                 val loginViewModel: LoginViewModel = koinViewModel()
                 val authState by loginViewModel.uiState.collectAsState()
                 var currentScreen by remember { mutableStateOf(Screen.Home) }
@@ -97,17 +105,6 @@ class MainActivity : ComponentActivity() {
                                         label = { Text("Transactions") }
                                     )
                                     NavigationBarItem(
-                                        selected = currentScreen == Screen.Contacts,
-                                        onClick = { currentScreen = Screen.Contacts },
-                                        icon = {
-                                            Icon(
-                                                Icons.Default.ContactPage,
-                                                contentDescription = null
-                                            )
-                                        },
-                                        label = { Text("Contacts") }
-                                    )
-                                    NavigationBarItem(
                                         selected = currentScreen == Screen.Master,
                                         onClick = { currentScreen = Screen.Master },
                                         icon = {
@@ -118,13 +115,24 @@ class MainActivity : ComponentActivity() {
                                         },
                                         label = { Text("Master SetUp") }
                                     )
+                                    NavigationBarItem(
+                                        selected = currentScreen == Screen.Reports,
+                                        onClick = { currentScreen = Screen.Reports },
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.BarChart,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        label = { Text("Reports") }
+                                    )
                                 }
                             }
                         ) { innerPadding ->
                             Box(modifier = Modifier.padding(innerPadding)) {
                                 when (currentScreen) {
                                     Screen.Transactions -> TransactionScreen(onSignOut = { loginViewModel.logout() })
-                                    Screen.Contacts -> ContactScreen()
+                                    Screen.Reports -> ReportsScreen(onSignOut = { loginViewModel.logout() })
                                     Screen.Master -> MasterScreen(onSignOut = { loginViewModel.logout() })
                                     Screen.Home -> HomeScreen(onSignOut = { loginViewModel.logout() })
                                 }
@@ -138,5 +146,5 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screen {
-    Transactions, Contacts, Master, Home
+    Transactions, Master, Home, Reports
 }

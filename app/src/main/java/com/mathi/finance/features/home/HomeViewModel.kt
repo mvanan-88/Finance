@@ -3,6 +3,7 @@ package com.mathi.finance.features.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mathi.finance.features.home.domain.repository.HomeRepository
+import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ class HomeViewModel(
 
     init {
         fetchIncomeExpense()
+        fetchUrgentActions()
         observeTransactions()
     }
 
@@ -49,12 +51,26 @@ class HomeViewModel(
                 }
         }
     }
+
+    fun fetchUrgentActions() {
+        viewModelScope.launch {
+            homeRepository.fetchUrgentActions()
+                .onSuccess { result ->
+                    _uiState.update { it.copy(urgentActions = result) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(error = e.localizedMessage ?: "Unknown error") }
+                }
+        }
+    }
 }
 
 data class HomeUIState(
     val summary: HomeDashboardBasicData? = null,
     val error: String = "",
-    val topDebtors: List<Debtor> = emptyList()
+    val topDebtors: List<Debtor> = emptyList(),
+    val urgentActions: List<TransactionSummary> = emptyList()
 )
+
 
 data class Debtor(val name: String, val amount: Float)

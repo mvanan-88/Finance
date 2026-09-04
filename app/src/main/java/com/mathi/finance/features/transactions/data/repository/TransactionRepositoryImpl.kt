@@ -8,6 +8,7 @@ import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.master.domain.model.instalment_data
 import com.mathi.finance.features.transactions.domain.model.PaymentsModel
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
+import com.mathi.finance.features.transactions.domain.model.RiskTransaction
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.features.transactions.domain.repository.TransactionRepository
 import io.github.jan.supabase.postgrest.from
@@ -22,6 +23,38 @@ class TransactionRepositoryImpl(
         return try {
             val result = SupabaseClient.client.from("transaction_summary_view")
                 .select() {
+                    filter {
+                        eq("created_by", currentUserId)
+                    }
+                }
+                .decodeList<TransactionSummary>()
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun fetchRiskTransactions(): Result<List<RiskTransaction>> {
+        if (currentUserId == -1) return Result.success(emptyList())
+        return try {
+            val result = SupabaseClient.client.from("risk_transaction_view")
+                .select {
+                    filter {
+                        eq("created_by", currentUserId)
+                    }
+                }
+                .decodeList<RiskTransaction>()
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun fetchCollectionLogs(): Result<List<TransactionSummary>> {
+        if (currentUserId == -1) return Result.success(emptyList())
+        return try {
+            val result = SupabaseClient.client.from("payments_table")
+                .select {
                     filter {
                         eq("created_by", currentUserId)
                     }

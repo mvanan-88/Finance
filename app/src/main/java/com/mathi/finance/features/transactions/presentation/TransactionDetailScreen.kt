@@ -2,7 +2,6 @@ package com.mathi.finance.features.transactions.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
+import com.mathi.finance.ui.presentation.EmptyState
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
@@ -50,11 +51,22 @@ fun TransactionDetailScreen(
     viewModel: TransactionViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
+    var showLedger by remember { mutableStateOf(false) }
+
+    if (showLedger) {
+        BorrowerLedgerScreen(
+            transaction = transaction,
+            onBack = { showLedger = false }
+        )
+        return
+    }
+
     val contactName = transaction.name
     val interestRate = transaction.interest_rate
     val instalmentTenure = transaction.tenure
     var amountCollected by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
+    var isManualPaymentEnabled by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
     val terms = (transaction.total_terms_paid ?: 0) + (if (uiState.paymentCompleted) 1 else 0)
@@ -178,12 +190,19 @@ fun TransactionDetailScreen(
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
+                        
+                        TextButton(
+                            onClick = { showLedger = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("View Detailed Ledger")
+                        }
                     }
                 }
             }
 
             // Collect Cash Section
-            if (!uiState.paymentCompleted) {
+            if (!uiState.paymentCompleted || isManualPaymentEnabled) {
                 item {
                     Text(
                         text = "Collect Payment",
@@ -259,6 +278,7 @@ fun TransactionDetailScreen(
                                         viewModel.makePayment(transaction.id, amountCollected, note)
                                         amountCollected = ""
                                         note = ""
+                                        isManualPaymentEnabled = false
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -268,6 +288,16 @@ fun TransactionDetailScreen(
                                 Text("Submit Payment", modifier = Modifier.padding(vertical = 4.dp))
                             }
                         }
+                    }
+                }
+            } else {
+                item {
+                    Button(
+                        onClick = { isManualPaymentEnabled = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Make Payment")
                     }
                 }
             }
@@ -322,18 +352,14 @@ fun TransactionDetailScreen(
                 }
             } else if (!uiState.isLoading) {
                 item {
-                    Box(
+                    EmptyState(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No payment history found",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                        message = "No payment history found",
+                        actionText = "",
+                        onActionClick = {}
+                    )
                 }
             }
         }

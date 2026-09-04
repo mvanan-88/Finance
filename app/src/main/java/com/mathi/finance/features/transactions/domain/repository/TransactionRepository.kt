@@ -6,10 +6,13 @@ import com.mathi.finance.features.master.domain.model.TransactionType
 import com.mathi.finance.features.master.domain.model.instalment_data
 import com.mathi.finance.features.transactions.domain.model.PaymentsModel
 import com.mathi.finance.features.transactions.domain.model.PerPersonTransaction
+import com.mathi.finance.features.transactions.domain.model.RiskTransaction
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 
 interface TransactionRepository {
     suspend fun fetchTransactions(): Result<List<TransactionSummary>>
+    suspend fun fetchRiskTransactions(): Result<List<RiskTransaction>>
+    suspend fun fetchCollectionLogs(): Result<List<TransactionSummary>>
     suspend fun fetchContacts(): Result<List<Contact>>
     suspend fun fetchTransactionTypes(): Result<List<TransactionType>>
     suspend fun fetchInterestRates(): Result<List<InterestRates>>

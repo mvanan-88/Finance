@@ -35,10 +35,10 @@ class TransactionViewModel(
     val uiState: StateFlow<TransactionUIState> = _uiState.asStateFlow()
 
     init {
-        fetchInitialData()
+        refreshData()
     }
 
-    private fun fetchInitialData() {
+    fun refreshData() {
         fetchTransactions()
         fetchContacts()
         fetchTransactionTypes()
