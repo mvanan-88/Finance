@@ -26,7 +26,7 @@ fun RecoveryProgressCard(
     modifier: Modifier = Modifier
 ) {
     val progress = if (totalOutstanding > 0) totalRecovered / totalOutstanding else 0f
-    
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -40,17 +40,19 @@ fun RecoveryProgressCard(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             LinearProgressIndicator(
                 progress = { progress },
-                modifier = Modifier.fillMaxWidth().height(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.outlineVariant,
                 strokeCap = StrokeCap.Round
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

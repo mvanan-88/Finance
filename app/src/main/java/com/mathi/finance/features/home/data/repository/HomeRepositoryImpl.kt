@@ -7,7 +7,7 @@ import com.mathi.finance.features.home.domain.repository.HomeRepository
 import io.github.jan.supabase.postgrest.from
 
 class HomeRepositoryImpl(
-    private val preferenceManager: PreferenceManager
+    preferenceManager: PreferenceManager
 ) : HomeRepository {
     private val currentUserId = preferenceManager.getUserId()
 

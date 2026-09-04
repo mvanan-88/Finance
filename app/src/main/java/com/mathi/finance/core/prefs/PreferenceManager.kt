@@ -4,7 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class PreferenceManager(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("my_finance_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("my_finance_prefs", Context.MODE_PRIVATE)
 
     fun saveUserId(userId: Int) {
         prefs.edit().putInt("user_id", userId).apply()

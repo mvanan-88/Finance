@@ -122,7 +122,10 @@ fun InterestRateScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = item.interest_rate.toString(), modifier = Modifier.padding(all = 16.dp))
+                                Text(
+                                    text = item.interest_rate.toString(),
+                                    modifier = Modifier.padding(all = 16.dp)
+                                )
                                 Row(
                                     modifier = Modifier.padding(all = 16.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -234,7 +237,10 @@ fun InterestRateScreen(
                             val rate = interestRateInput.toFloatOrNull() ?: 0.0f
                             if (rate > 0.0f) {
                                 if (editingItem == null) {
-                                    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+                                    val sdf = SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                                        Locale.getDefault()
+                                    )
                                     val currentDate = sdf.format(Date())
                                     val newType = InterestRates(
                                         interest_rate = rate,

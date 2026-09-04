@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InterestRates(
-    val id: Int?=null,
+    val id: Int? = null,
     val created_at: String,
-    val interest_rate : Float,
+    val interest_rate: Float,
     val status: Int,
-    val created_by: Int?=null
+    val created_by: Int? = null
 )

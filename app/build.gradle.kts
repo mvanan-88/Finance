@@ -46,7 +46,7 @@ dependencies {
     implementation(libs.supabase.auth)
     implementation(libs.ktor.client.android)
     implementation(libs.kotlinx.serialization.json)
-    implementation (libs.compose.charts)
+    implementation(libs.compose.charts)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.room.runtime)

@@ -26,7 +26,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single { 
+    single {
         Room.databaseBuilder(
             androidContext(),
             AppDatabase::class.java,
@@ -36,14 +36,14 @@ val appModule = module {
     single { get<AppDatabase>().contactDao() }
     single { PreferenceManager(androidContext()) }
     single<NetworkObserver> { ConnectivityObserver(androidContext()) }
-    
+
     // Repositories
     single<AuthRepository> { AuthRepositoryImpl(get()) }
     single<MasterRepository> { MasterRepositoryImpl(get()) }
     single<TransactionRepository> { TransactionRepositoryImpl(get()) }
     single<ContactRepository> { ContactRepositoryImpl(get(), get()) }
     single<HomeRepository> { HomeRepositoryImpl(get()) }
-    
+
     viewModel { LoginViewModel(get()) }
     viewModel { MasterViewModel(get()) }
     viewModel { TransactionViewModel(get()) }

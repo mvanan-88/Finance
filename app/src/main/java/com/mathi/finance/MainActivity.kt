@@ -73,25 +73,45 @@ class MainActivity : ComponentActivity() {
                                     NavigationBarItem(
                                         selected = currentScreen == Screen.Home,
                                         onClick = { currentScreen = Screen.Home },
-                                        icon = { Icon(Icons.Filled.Home, contentDescription = null) },
+                                        icon = {
+                                            Icon(
+                                                Icons.Filled.Home,
+                                                contentDescription = null
+                                            )
+                                        },
                                         label = { Text("Home") }
                                     )
                                     NavigationBarItem(
                                         selected = currentScreen == Screen.Transactions,
                                         onClick = { currentScreen = Screen.Transactions },
-                                        icon = { Icon(Icons.Default.ReceiptLong, contentDescription = null) },
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.ReceiptLong,
+                                                contentDescription = null
+                                            )
+                                        },
                                         label = { Text("Transactions") }
                                     )
                                     NavigationBarItem(
                                         selected = currentScreen == Screen.Contacts,
                                         onClick = { currentScreen = Screen.Contacts },
-                                        icon = { Icon(Icons.Default.ContactPage, contentDescription = null) },
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.ContactPage,
+                                                contentDescription = null
+                                            )
+                                        },
                                         label = { Text("Contacts") }
                                     )
                                     NavigationBarItem(
                                         selected = currentScreen == Screen.Master,
                                         onClick = { currentScreen = Screen.Master },
-                                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.Settings,
+                                                contentDescription = null
+                                            )
+                                        },
                                         label = { Text("Master SetUp") }
                                     )
                                 }

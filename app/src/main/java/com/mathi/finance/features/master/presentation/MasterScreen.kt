@@ -32,7 +32,7 @@ import com.mathi.finance.ui.presentation.AppBar
 @Composable
 fun MasterScreen(onSignOut: () -> Unit) {
     var selectedId by remember { mutableStateOf<String?>(null) }
-    
+
     if (selectedId == null) {
         MasterListScreen(onItemSelected = { selectedId = it }, onSignOut = onSignOut)
     } else {
@@ -47,11 +47,11 @@ fun MasterScreen(onSignOut: () -> Unit) {
 @Composable
 fun MasterListScreen(onItemSelected: (String) -> Unit, onSignOut: () -> Unit) {
     var list = ArrayList<master_data>()
-    var md = master_data(id = "1",master="Transaction Type")
+    var md = master_data(id = "1", master = "Transaction Type")
     list.add(md)
-    md = master_data(id = "2",master="Interest Rates")
+    md = master_data(id = "2", master = "Interest Rates")
     list.add(md)
-    md = master_data(id = "3",master="Instalment Tenures")
+    md = master_data(id = "3", master = "Instalment Tenures")
     list.add(md)
     Scaffold(
         topBar = { AppBar("Master Data", onSignOut = onSignOut) },
@@ -79,7 +79,11 @@ fun MasterListScreen(onItemSelected: (String) -> Unit, onSignOut: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = item.master, modifier = Modifier.padding(all = 16.dp))
-                            Icon(Icons.Default.ArrowCircleRight, contentDescription = null,modifier = Modifier.padding(all = 16.dp))
+                            Icon(
+                                Icons.Default.ArrowCircleRight,
+                                contentDescription = null,
+                                modifier = Modifier.padding(all = 16.dp)
+                            )
                         }
                     }
                 })

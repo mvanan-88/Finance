@@ -101,10 +101,14 @@ fun TransactionScreen(
     var selectedContact by remember { mutableStateOf<Contact?>(null) }
     var selectedType by remember { mutableStateOf<TransactionType?>(null) }
     var selectedInterestRate by remember { mutableStateOf<InterestRates?>(null) }
-    var selectedInstalment by remember { mutableStateOf<com.mathi.finance.features.master.domain.model.instalment_data?>(null) }
+    var selectedInstalment by remember {
+        mutableStateOf<com.mathi.finance.features.master.domain.model.instalment_data?>(
+            null
+        )
+    }
     var tenureInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
-    
+
     var showContactDialog by remember { mutableStateOf(false) }
     var typesExpanded by remember { mutableStateOf(false) }
     var interestExpanded by remember { mutableStateOf(false) }
@@ -138,15 +142,10 @@ fun TransactionScreen(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(uiState.transactions) { transaction ->
-                    val contactName = transaction.name ?: "Unknown"
-                    val typeName = transaction.transaction_type ?: "Unknown"
+                    val contactName = transaction.name
+                    val typeName = transaction.transaction_type
                     val interestRate = transaction.interest_rate
                     val instalmentTenure = transaction.tenure
-
-                    // Flag Logic
-                    val showFlag = remember(transaction) {
-                        transaction.days_difference in 21..<30
-                    }
 
                     Card(
                         modifier = Modifier
@@ -170,8 +169,8 @@ fun TransactionScreen(
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold
                                         )
-                                        when(transaction.risk_level){
-                                            1 ->{
+                                        when (transaction.risk_level) {
+                                            1 -> {
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Icon(
                                                     imageVector = Icons.Default.Flag,
@@ -180,6 +179,7 @@ fun TransactionScreen(
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                             }
+
                                             2 -> {
                                                 Spacer(modifier = Modifier.width(8.dp))
                                                 Icon(
@@ -309,7 +309,11 @@ fun TransactionScreen(
                                         onValueChange = {},
                                         readOnly = true,
                                         label = { Text("Interest Rate") },
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = interestExpanded) },
+                                        trailingIcon = {
+                                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                                expanded = interestExpanded
+                                            )
+                                        },
                                         modifier = Modifier
                                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                                             .fillMaxWidth()
@@ -330,7 +334,8 @@ fun TransactionScreen(
                                     }
                                 }
                             }
-                            "Installment","Instalment" -> {
+
+                            "Installment", "Instalment" -> {
                                 // Instalment Dropdown
                                 ExposedDropdownMenuBox(
                                     expanded = instalmentExpanded,
@@ -342,7 +347,11 @@ fun TransactionScreen(
                                         onValueChange = {},
                                         readOnly = true,
                                         label = { Text("Instalment Tenure") },
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = instalmentExpanded) },
+                                        trailingIcon = {
+                                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                                expanded = instalmentExpanded
+                                            )
+                                        },
                                         modifier = Modifier
                                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                                             .fillMaxWidth()
@@ -363,6 +372,7 @@ fun TransactionScreen(
                                     }
                                 }
                             }
+
                             else -> {
                                 // Tenure TextField for other transaction types
                                 TextField(
@@ -396,13 +406,27 @@ fun TransactionScreen(
                     Button(
                         onClick = {
                             val amount = amountInput.toFloatOrNull() ?: 0f
-                            val interestId = if (selectedType?.name.equals("Interest",false)) selectedInterestRate?.id else null
-                            val instalmentId = if (selectedType?.name.equals("Installment",false) || selectedType?.name.equals("Instalment",false) || selectedType?.name.equals("Instalment Tenure")) selectedInstalment?.id else null
+                            val interestId = if (selectedType?.name.equals(
+                                    "Interest",
+                                    false
+                                )
+                            ) selectedInterestRate?.id else null
+                            val instalmentId = if (selectedType?.name.equals(
+                                    "Installment",
+                                    false
+                                ) || selectedType?.name.equals(
+                                    "Instalment",
+                                    false
+                                ) || selectedType?.name.equals("Instalment Tenure")
+                            ) selectedInstalment?.id else null
                             val contactId = selectedContact?.id
                             val typeId = selectedType?.id
 
                             if (amount > 0 && contactId != null && typeId != null) {
-                                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
+                                val sdf = SimpleDateFormat(
+                                    "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                                    Locale.getDefault()
+                                )
                                 val currentDate = sdf.format(Date())
 
                                 val transaction = PerPersonTransaction(
@@ -415,7 +439,7 @@ fun TransactionScreen(
                                     created_by = 0 // Repository overrides this with the actual user ID
                                 )
                                 viewModel.addTransaction(transaction)
-                                
+
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                                     if (!sheetState.isVisible) {
                                         showBottomSheet = false
@@ -431,7 +455,7 @@ fun TransactionScreen(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null && 
+                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null &&
                                 (selectedType?.id != 2 || selectedInterestRate != null) &&
                                 (selectedType?.id != 1 || selectedInstalment != null) &&
                                 (selectedType?.id == 2 || selectedType?.id == 1 || tenureInput.isNotEmpty())
@@ -477,7 +501,7 @@ fun SearchableContactDialog(
         } else {
             contacts.filter {
                 it.name.contains(searchQuery, ignoreCase = true) ||
-                (it.phoneNumber?.contains(searchQuery) ?: false)
+                        (it.phoneNumber?.contains(searchQuery) ?: false)
             }
         }
     }

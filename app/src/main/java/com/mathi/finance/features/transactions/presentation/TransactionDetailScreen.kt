@@ -1,15 +1,38 @@
 package com.mathi.finance.features.transactions.presentation
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,15 +50,15 @@ fun TransactionDetailScreen(
     viewModel: TransactionViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
-    val contactName = transaction.name ?: "Unknown"
+    val contactName = transaction.name
     val interestRate = transaction.interest_rate
     val instalmentTenure = transaction.tenure
     var amountCollected by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
-    
+
     val terms = (transaction.total_terms_paid ?: 0) + (if (uiState.paymentCompleted) 1 else 0)
-    
+
     val amountToBePaid = if (interestRate != null && interestRate > 0) {
         transaction.amount * (interestRate.toFloat() / 100f)
     } else if (instalmentTenure != null && instalmentTenure > 0) {
@@ -133,7 +156,11 @@ fun TransactionDetailScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(
+                                alpha = 0.5f
+                            )
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -184,12 +211,18 @@ fun TransactionDetailScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = "₹${String.format(Locale.getDefault(), "%.2f", amountToBePaid)}",
+                                text = "₹${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.2f",
+                                        amountToBePaid
+                                    )
+                                }",
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            
+
                             Spacer(modifier = Modifier.height(16.dp))
 
                             OutlinedTextField(
@@ -208,7 +241,12 @@ fun TransactionDetailScreen(
                                 value = note,
                                 onValueChange = { note = it },
                                 label = { Text("Notes (Optional)") },
-                                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.Notes,
+                                        contentDescription = null
+                                    )
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             )
@@ -284,7 +322,12 @@ fun TransactionDetailScreen(
                 }
             } else if (!uiState.isLoading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             text = "No payment history found",
                             style = MaterialTheme.typography.bodyMedium,

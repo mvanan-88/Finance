@@ -32,7 +32,7 @@ class HomeViewModel(
                     }
                     .sortedByDescending { it.amount }
                     .take(5)
-                
+
                 _uiState.update { it.copy(topDebtors = topDebtors) }
             }
         }

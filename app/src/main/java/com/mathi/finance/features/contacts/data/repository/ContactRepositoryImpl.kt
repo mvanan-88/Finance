@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 
 class ContactRepositoryImpl(
     private val contactDao: ContactDao,
-    private val preferenceManager: PreferenceManager
+    preferenceManager: PreferenceManager
 ) : ContactRepository {
     private val currentUserId = preferenceManager.getUserId()
 
@@ -33,7 +33,7 @@ class ContactRepositoryImpl(
 
         try {
             val contactsToSync = unsynced.map { it.toDomain().copy(created_by = currentUserId) }
-            
+
             // Fetch existing to avoid duplicates as previously implemented
             val response = SupabaseClient.client.from("contacts")
                 .select {
@@ -44,12 +44,13 @@ class ContactRepositoryImpl(
                 .decodeList<Contact>()
 
             val existingNumbers = response.mapNotNull { it.phoneNumber }.toSet()
-            val filteredContacts = contactsToSync.filter { it.phoneNumber != null && it.phoneNumber !in existingNumbers }
+            val filteredContacts =
+                contactsToSync.filter { it.phoneNumber != null && it.phoneNumber !in existingNumbers }
 
             if (filteredContacts.isNotEmpty()) {
                 SupabaseClient.client.from("contacts").insert(filteredContacts)
             }
-            
+
             contactDao.markAsSynced(unsynced.map { it.id })
         } catch (e: Exception) {
             e.printStackTrace()

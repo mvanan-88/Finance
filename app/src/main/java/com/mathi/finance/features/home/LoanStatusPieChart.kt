@@ -57,7 +57,7 @@ fun LoanStatusPieChart(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 StatusLegend(label = "Active", count = activeCount, color = activeColor)
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusLegend(label = "Completed", count = completedCount, color = completedColor)

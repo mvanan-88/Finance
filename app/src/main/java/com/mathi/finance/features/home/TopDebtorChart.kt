@@ -45,7 +45,9 @@ fun TopDebtorChart(
             debtors.forEach { debtor ->
                 val progress = debtor.amount / maxAmount
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -55,19 +57,21 @@ fun TopDebtorChart(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     LinearProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier.weight(1.5f).height(8.dp),
+                        modifier = Modifier
+                            .weight(1.5f)
+                            .height(8.dp),
                         color = MaterialTheme.colorScheme.tertiary,
                         trackColor = MaterialTheme.colorScheme.outlineVariant,
                         strokeCap = StrokeCap.Round
                     )
-                    
+
                     Spacer(modifier = Modifier.width(12.dp))
-                    
+
                     Text(
                         text = "₹${debtor.amount.toInt()}",
                         style = MaterialTheme.typography.bodySmall,

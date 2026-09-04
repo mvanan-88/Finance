@@ -9,6 +9,6 @@ data class TransactionType(
     val name: String,
     @SerialName("created_at")
     val createdAt: String,
-    val created_by: Int?=0,
+    val created_by: Int? = 0,
     val status: Int,
 )

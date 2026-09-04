@@ -50,7 +50,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState(HomeUIState())
     val colorScheme = MaterialTheme.colorScheme
-    
+
     val actions = remember(colorScheme) {
         listOf(
             QuickActionItem("Scan Receipt", Icons.Default.QrCodeScanner, colorScheme.secondary),
@@ -95,7 +95,13 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "₹${String.format(Locale.getDefault(), "%.2f", uiState.summary?.totalActiveLended ?: 0f)}",
+                                text = "₹${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.2f",
+                                        uiState.summary?.totalActiveLended ?: 0f
+                                    )
+                                }",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Black
@@ -106,8 +112,16 @@ fun HomeScreen(
                             modifier = Modifier.align(Alignment.BottomStart),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            SummaryMini(label = "Income", value = "+₹2,100", icon = Icons.AutoMirrored.Filled.TrendingUp)
-                            SummaryMini(label = "Expense", value = "-₹850", icon = Icons.AutoMirrored.Filled.TrendingDown)
+                            SummaryMini(
+                                label = "Income",
+                                value = "+₹2,100",
+                                icon = Icons.AutoMirrored.Filled.TrendingUp
+                            )
+                            SummaryMini(
+                                label = "Expense",
+                                value = "-₹850",
+                                icon = Icons.AutoMirrored.Filled.TrendingDown
+                            )
                         }
                     }
                 }
@@ -157,7 +171,7 @@ fun HomeScreen(
                     }
                 }
             }
-            
+
             item {
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -176,8 +190,17 @@ fun SummaryMini(label: String, value: String, icon: ImageVector) {
         )
         Spacer(modifier = Modifier.width(4.dp))
         Column {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
-            Text(text = value, style = MaterialTheme.typography.bodySmall, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -208,7 +231,11 @@ fun ActionCard(action: QuickActionItem) {
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = action.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = action.title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }

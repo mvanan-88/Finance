@@ -67,7 +67,7 @@ fun TransactionTypeScreen(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-    
+
     // Form States
     var transactionTypeName by remember { mutableStateOf("") }
     var transactionStatus by remember { mutableIntStateOf(1) } // 1 for Active, 0 for Inactive
@@ -173,14 +173,14 @@ fun TransactionTypeScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     TextField(
                         value = transactionTypeName,
                         onValueChange = { transactionTypeName = it },
                         label = { Text("Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Status Dropdown
@@ -221,12 +221,15 @@ fun TransactionTypeScreen(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     Button(
                         onClick = {
                             if (transactionTypeName.isNotBlank()) {
                                 if (editingItem == null) {
-                                    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+                                    val sdf = SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                                        Locale.getDefault()
+                                    )
                                     val currentDate = sdf.format(Date())
                                     val newType = TransactionType(
                                         name = transactionTypeName,
@@ -241,7 +244,7 @@ fun TransactionTypeScreen(
                                     )
                                     viewModel.updateTransaction(updatedType)
                                 }
-                                
+
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                                     if (!sheetState.isVisible) {
                                         showBottomSheet = false
