@@ -46,7 +46,7 @@ fun MasterScreen(onSignOut: () -> Unit) {
 
 @Composable
 fun MasterListScreen(onItemSelected: (String) -> Unit, onSignOut: () -> Unit) {
-    var list = ArrayList<master_data>()
+    val list = ArrayList<master_data>()
     var md = master_data(id = "1", master = "Transaction Type")
     list.add(md)
     md = master_data(id = "2", master = "Interest Rates")
