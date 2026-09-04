@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.ContactPage
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ReceiptLong
@@ -89,7 +90,7 @@ class MainActivity : ComponentActivity() {
                                         onClick = { currentScreen = Screen.Transactions },
                                         icon = {
                                             Icon(
-                                                Icons.Default.ReceiptLong,
+                                                Icons.AutoMirrored.Filled.ReceiptLong,
                                                 contentDescription = null
                                             )
                                         },
