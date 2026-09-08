@@ -57,7 +57,7 @@ fun WhatsAppIcon(modifier: Modifier = Modifier) {
     Icon(
         imageVector = WhatsAppVector,
         contentDescription = "WhatsApp",
-        tint = Color(0xFF25D366),
+        tint = Color(0xFFffffff),
         modifier = modifier.size(24.dp)
     )
 }

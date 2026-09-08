@@ -14,15 +14,15 @@ import com.mathi.finance.features.transactions.domain.repository.TransactionRepo
 import io.github.jan.supabase.postgrest.from
 
 class TransactionRepositoryImpl(
-    preferenceManager: PreferenceManager
+    private val preferenceManager: PreferenceManager
 ) : TransactionRepository {
-    private val currentUserId = preferenceManager.getUserId()
+    private val currentUserId get() = preferenceManager.getUserId()
 
     override suspend fun fetchTransactions(): Result<List<TransactionSummary>> {
         if (currentUserId == -1) return Result.success(emptyList())
         return try {
             val result = SupabaseClient.client.from("transaction_summary_view")
-                .select() {
+                .select {
                     filter {
                         eq("created_by", currentUserId)
                     }

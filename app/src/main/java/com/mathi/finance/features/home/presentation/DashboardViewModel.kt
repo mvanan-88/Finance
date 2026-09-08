@@ -24,7 +24,7 @@ class DashboardViewModel(
     fun fetchDashboardData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            repository.fetchTransactionDashboardSummary()
+            repository.fetchDashboardSummary()
                 .onSuccess { data ->
                     _uiState.update { 
                         it.copy(

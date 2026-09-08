@@ -226,7 +226,7 @@ fun TransactionScreen(
                                             )
                                         } else if (instalmentTenure != null) {
                                             Text(
-                                                text = if (transaction.transaction_type == "Installment") "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
+                                                text = if (transaction.transaction_type.equals("Installment",true) || transaction.transaction_type.equals("Instalment",true)) "Tenure: $instalmentTenure weeks" else "Tenure: $instalmentTenure days",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.secondary
                                             )

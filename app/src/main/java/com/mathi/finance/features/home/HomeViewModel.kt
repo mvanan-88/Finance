@@ -2,6 +2,7 @@ package com.mathi.finance.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mathi.finance.features.home.domain.model.TransactionDashboardSummary
 import com.mathi.finance.features.home.domain.repository.HomeRepository
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.features.transactions.presentation.TransactionViewModel
@@ -66,7 +67,7 @@ class HomeViewModel(
 }
 
 data class HomeUIState(
-    val summary: HomeDashboardBasicData? = null,
+    val summary: TransactionDashboardSummary? = null,
     val error: String = "",
     val topDebtors: List<Debtor> = emptyList(),
     val urgentActions: List<TransactionSummary> = emptyList()

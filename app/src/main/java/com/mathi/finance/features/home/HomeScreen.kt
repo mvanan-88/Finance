@@ -124,7 +124,7 @@ fun HomeScreen(
                                     String.format(
                                         Locale.getDefault(),
                                         "%.2f",
-                                        uiState.summary?.totalActiveLended ?: 0f
+                                        uiState.summary?.activeCount ?: 0f
                                     )
                                 }",
                                 style = MaterialTheme.typography.headlineLarge,
@@ -154,15 +154,15 @@ fun HomeScreen(
 
             item {
                 RecoveryProgressCard(
-                    totalOutstanding = uiState.summary?.totalActiveLended ?: 0f,
-                    totalRecovered = uiState.summary?.totalActiveRecovered ?: 0f
+                    totalOutstanding = uiState.summary?.lended ?: 0f,
+                    totalRecovered = uiState.summary?.recovered ?: 0f
                 )
             }
 
             item {
                 LoanStatusPieChart(
-                    activeCount = uiState.summary?.activeLoans ?: 0,
-                    completedCount = uiState.summary?.completedLoans ?: 0
+                    activeCount = uiState.summary?.activeCount ?: 0,
+                    completedCount = uiState.summary?.inactiveCount ?: 0
                 )
             }
 
@@ -252,50 +252,67 @@ fun UrgentActionItem(transaction: TransactionSummary, onClick: () -> Unit) {
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Icon(
-                    imageVector = Icons.Default.Flag,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = transaction.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(24.dp)
                     )
-                    Text(
-                        text = "Overdue by ${transaction.days_difference} days",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        WhatsAppReminderButton(
-                            phoneNumber = "+919791580355",
-                            message = "Hi ${transaction.name}, this is a reminder for your upcoming payment of ₹${transaction.amount}. Please clear it at your earliest."
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = transaction.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
-                        SmsReminderButton(
-                            phoneNumber = "+919791580355",
-                            message = "Friendly reminder: Your payment of ₹${transaction.amount} is overdue."
+                        Text(
+                            text = "Overdue by ${transaction.days_difference} days",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
+                val amountToBePaid = if (transaction.interest_rate != null && (transaction.interest_rate > 0)) {
+                    transaction.amount * (transaction.interest_rate.toFloat() / 100f)
+                } else if (transaction.tenure != null && transaction.tenure > 0) {
+                    transaction.amount / transaction.tenure
+                } else {
+                    transaction.amount
+                }
+                Text(
+                    text = "₹$amountToBePaid",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
-            Text(
-                text = "₹${transaction.amount}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.error
-            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                WhatsAppReminderButton(
+                    phoneNumber = "+919791580355",
+                    message = "Hi ${transaction.name}, this is a reminder for your upcoming payment of ₹${transaction.amount}. Please clear it at your earliest.",
+                    modifier = Modifier.weight(1f),
+                    buttonText = "WhatsApp"
+                )
+                SmsReminderButton(
+                    phoneNumber = "+919791580355",
+                    message = "Friendly reminder: Your payment of ₹${transaction.amount} is overdue.",
+                    modifier = Modifier.weight(1f),
+                    buttonText = "SMS"
+                )
+            }
         }
     }
 }

@@ -9,9 +9,9 @@ import com.mathi.finance.features.master.domain.repository.MasterRepository
 import io.github.jan.supabase.postgrest.from
 
 class MasterRepositoryImpl(
-    preferenceManager: PreferenceManager
+    private val preferenceManager: PreferenceManager
 ) : MasterRepository {
-    private val currentUserId = preferenceManager.getUserId()
+    private val currentUserId get() = preferenceManager.getUserId()
 
     override suspend fun fetchTransactionTypes(): Result<List<TransactionType>> {
         return try {
@@ -27,10 +27,10 @@ class MasterRepositoryImpl(
     }
 
     override suspend fun addTransactionType(transactionType: TransactionType): Result<Unit> {
-        transactionType.copy(created_by = currentUserId)
         return try {
+            val transactionWithUser = transactionType.copy(created_by = currentUserId)
             SupabaseClient.client.from("transaction_type")
-                .insert(transactionType)
+                .insert(transactionWithUser)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -65,7 +65,6 @@ class MasterRepositoryImpl(
     }
 
     override suspend fun addInterestRate(interestRate: InterestRates): Result<Unit> {
-        interestRate.copy(created_by = currentUserId)
         return try {
             val interestWithUser = interestRate.copy(created_by = currentUserId)
             SupabaseClient.client.from("interest_rates")
