@@ -469,10 +469,8 @@ fun TransactionScreen(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null &&
-                                (selectedType?.id != 2 || selectedInterestRate != null) &&
-                                (selectedType?.id != 1 || selectedInstalment != null) &&
-                                (selectedType?.id == 2 || selectedType?.id == 1 || tenureInput.isNotEmpty())
+                        enabled = amountInput.isNotEmpty() && selectedContact != null && selectedType != null
+
                     ) {
                         Text("Submit")
                     }

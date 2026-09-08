@@ -124,7 +124,7 @@ fun HomeScreen(
                                     String.format(
                                         Locale.getDefault(),
                                         "%.2f",
-                                        uiState.summary?.activeCount ?: 0f
+                                        uiState.summary?.lended ?: 0f
                                     )
                                 }",
                                 style = MaterialTheme.typography.headlineLarge,
