@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mathi.finance.core.util.DateUtils
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
 import com.mathi.finance.ui.presentation.EmptyState
@@ -104,7 +105,7 @@ fun CollectionLogScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = date,
+                                    text = DateUtils.formatSqlDate(date),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mathi.finance.core.util.DateUtils
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
 import org.koin.androidx.compose.koinViewModel
@@ -201,7 +202,7 @@ fun LedgerEntryItem(amount: Float, date: String, note: String) {
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = date.take(10),
+                        text = DateUtils.formatSqlDate(date),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.mathi.finance.core.util.DateUtils
 import com.mathi.finance.features.transactions.domain.model.TransactionSummary
 import com.mathi.finance.ui.presentation.AppBar
 import com.mathi.finance.ui.presentation.EmptyState
@@ -179,7 +180,7 @@ fun TransactionDetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Start: ${transaction.created_at.take(10)}",
+                                text = "Start: ${DateUtils.formatSqlDate(transaction.created_at)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -343,7 +344,7 @@ fun TransactionDetailScreen(
                                 }
                             }
                             Text(
-                                text = payment.created_at.take(10),
+                                text = DateUtils.formatSqlDate(payment.created_at),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

@@ -14,6 +14,7 @@ data class TransactionSummary(
     val total_terms_paid: Int? = 0,
     val risk_level: Int? = 0,
     val transaction_type: String,
+    val phone_number: String,
     val name: String,
     val notes: String?="",
     val created_by: Int,

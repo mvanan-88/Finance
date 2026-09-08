@@ -301,13 +301,13 @@ fun UrgentActionItem(transaction: TransactionSummary, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 WhatsAppReminderButton(
-                    phoneNumber = "+919791580355",
+                    phoneNumber = transaction.phone_number,
                     message = "Hi ${transaction.name}, this is a reminder for your upcoming payment of ₹${transaction.amount}. Please clear it at your earliest.",
                     modifier = Modifier.weight(1f),
                     buttonText = "WhatsApp"
                 )
                 SmsReminderButton(
-                    phoneNumber = "+919791580355",
+                    phoneNumber = transaction.phone_number,
                     message = "Friendly reminder: Your payment of ₹${transaction.amount} is overdue.",
                     modifier = Modifier.weight(1f),
                     buttonText = "SMS"
