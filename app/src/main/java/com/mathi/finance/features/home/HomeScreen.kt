@@ -138,13 +138,25 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             SummaryMini(
-                                label = "Income",
-                                value = "+₹2,100",
+                                label = "This Week",
+                                value = "₹${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.2f",
+                                        uiState.summary?.this_week ?: 0f
+                                    )
+                                }",
                                 icon = Icons.AutoMirrored.Filled.TrendingUp
                             )
                             SummaryMini(
-                                label = "Expense",
-                                value = "-₹850",
+                                label = "Today",
+                                value = "₹${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.2f",
+                                        uiState.summary?.today ?: 0f
+                                    )
+                                }",
                                 icon = Icons.AutoMirrored.Filled.TrendingDown
                             )
                         }
@@ -252,6 +264,13 @@ fun UrgentActionItem(transaction: TransactionSummary, onClick: () -> Unit) {
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
     ) {
+        val amountToBePaid = if (transaction.interest_rate != null && (transaction.interest_rate > 0)) {
+            transaction.amount * (transaction.interest_rate.toFloat() / 100f)
+        } else if (transaction.tenure != null && transaction.tenure > 0) {
+            transaction.amount / transaction.tenure
+        } else {
+            transaction.amount
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -279,13 +298,7 @@ fun UrgentActionItem(transaction: TransactionSummary, onClick: () -> Unit) {
                         )
                     }
                 }
-                val amountToBePaid = if (transaction.interest_rate != null && (transaction.interest_rate > 0)) {
-                    transaction.amount * (transaction.interest_rate.toFloat() / 100f)
-                } else if (transaction.tenure != null && transaction.tenure > 0) {
-                    transaction.amount / transaction.tenure
-                } else {
-                    transaction.amount
-                }
+
                 Text(
                     text = "₹$amountToBePaid",
                     style = MaterialTheme.typography.titleMedium,
@@ -302,13 +315,13 @@ fun UrgentActionItem(transaction: TransactionSummary, onClick: () -> Unit) {
             ) {
                 WhatsAppReminderButton(
                     phoneNumber = transaction.phone_number,
-                    message = "Hi ${transaction.name}, this is a reminder for your upcoming payment of ₹${transaction.amount}. Please clear it at your earliest.",
+                    message = "Hi ${transaction.name}, this is a reminder for your upcoming payment of ₹$amountToBePaid. Please clear it at your earliest.",
                     modifier = Modifier.weight(1f),
                     buttonText = "WhatsApp"
                 )
                 SmsReminderButton(
                     phoneNumber = transaction.phone_number,
-                    message = "Friendly reminder: Your payment of ₹${transaction.amount} is overdue.",
+                    message = "Friendly reminder: Your payment of ₹$amountToBePaid is overdue.",
                     modifier = Modifier.weight(1f),
                     buttonText = "SMS"
                 )
