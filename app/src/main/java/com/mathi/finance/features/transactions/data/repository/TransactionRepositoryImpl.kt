@@ -148,6 +148,19 @@ class TransactionRepositoryImpl(
             notes = notes,
             created_by = currentUserId,
         )
+        if(notes.equals("Foreclosure")){
+
+            SupabaseClient.client.from("per_person_transaction").update(
+                {
+                    // Use the column name directly
+                    set("status", 0)
+                }
+            ) {
+                filter {
+                    eq("id", payment.loan_id)
+                }
+            }
+        }
         return try {
             SupabaseClient.client.from("payments_table")
                 .insert(payment)

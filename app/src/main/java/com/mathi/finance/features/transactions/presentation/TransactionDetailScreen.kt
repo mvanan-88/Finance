@@ -16,12 +16,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,9 +71,23 @@ fun TransactionDetailScreen(
     var amountCollected by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var isManualPaymentEnabled by remember { mutableStateOf(false) }
+    var showForecloseDialog by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
-    val terms = (transaction.total_terms_paid ?: 0) + (if (uiState.paymentCompleted) 1 else 0)
+    val terms = uiState.paymentHistory.size
+
+    val currentPaid = remember(transaction.amount_paid, uiState.paymentHistory) {
+        if (uiState.paymentHistory.isNotEmpty()) {
+            uiState.paymentHistory.sumOf { it.amount_paid.toDouble() }.toFloat()
+        } else {
+            transaction.amount_paid
+        }
+    }
+    val remainingBalance = if (interestRate != null && interestRate > 0) {
+        transaction.amount
+    }else{
+        transaction.amount - currentPaid
+    }
 
     val amountToBePaid = if (interestRate != null && interestRate > 0) {
         transaction.amount * (interestRate.toFloat() / 100f)
@@ -288,6 +305,24 @@ fun TransactionDetailScreen(
                             ) {
                                 Text("Submit Payment", modifier = Modifier.padding(vertical = 4.dp))
                             }
+
+                            if (remainingBalance > 0) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(
+                                    onClick = { showForecloseDialog = true },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error
+                                    ),
+                                    enabled = !uiState.isLoading
+                                ) {
+                                    Text(
+                                        "Foreclose Loan (₹$remainingBalance)",
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -364,5 +399,30 @@ fun TransactionDetailScreen(
                 }
             }
         }
+    }
+
+    if (showForecloseDialog) {
+        AlertDialog(
+            onDismissRequest = { showForecloseDialog = false },
+            title = { Text("Foreclose Loan") },
+            text = { Text("Are you sure you want to foreclose this loan by paying the remaining balance of ₹$remainingBalance?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.makePayment(transaction.id, remainingBalance.toString(), "Foreclosure")
+                        showForecloseDialog = false
+                        isManualPaymentEnabled = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Confirm Foreclosure")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showForecloseDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
