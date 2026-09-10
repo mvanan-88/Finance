@@ -22,10 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.mathi.finance.core.util.SmsHelper
 
-/**
- * A Jetpack Compose button component that handles SMS permissions and
- * triggers a background payment reminder.
- */
+
 @Composable
 fun SmsReminderButton(
     phoneNumber: String,

@@ -33,24 +33,11 @@ class ContactRepositoryImpl(
 
         try {
             val contactsToSync = unsynced.map { it.toDomain().copy(created_by = currentUserId) }
+                .filter { !it.phoneNumber.isNullOrBlank() }
 
-            // Fetch existing to avoid duplicates as previously implemented
-            val response = SupabaseClient.client.from("contacts")
-                .select {
-                    filter {
-                        eq("created_by", currentUserId)
-                    }
-                }
-                .decodeList<Contact>()
-
-            val existingNumbers = response.mapNotNull { it.phoneNumber }.toSet()
-            val filteredContacts =
-                contactsToSync.filter { it.phoneNumber != null && it.phoneNumber !in existingNumbers }
-
-            if (filteredContacts.isNotEmpty()) {
-                SupabaseClient.client.from("contacts").insert(filteredContacts)
+            SupabaseClient.client.from("contacts").upsert(contactsToSync) {
+                onConflict = "phone_number,name,created_by"
             }
-
             contactDao.markAsSynced(unsynced.map { it.id })
         } catch (e: Exception) {
             e.printStackTrace()
